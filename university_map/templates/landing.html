@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniMap - Найдите университет мечты</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .hero-section {
+            background: linear-gradient(rgba(255,255,255,0.95), rgba(255,255,255,0.98));
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 80px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><polygon fill="%23667eea08" points="0,1000 1000,0 1000,1000"/></svg>');
+            pointer-events: none;
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+        
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            color: #2c5aa0;
+            line-height: 1.2;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.4rem;
+            color: #6c757d;
+            margin-bottom: 2.5rem;
+            font-weight: 400;
+        }
+        
+        .btn-hero {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            padding: 18px 45px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            border-radius: 50px;
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+            margin-right: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .btn-hero:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 45px rgba(102, 126, 234, 0.6);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .btn-outline-hero {
+            background: transparent;
+            border: 2px solid #667eea;
+            padding: 16px 35px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 50px;
+            color: #667eea;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-hero:hover {
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            transform: translateY(-2px);
+        }
+        
+        .feature-section {
+            padding: 100px 0;
+            background: white;
+        }
+        
+        .section-title {
+            font-size: 2.8rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 3rem;
+            color: #2c5aa0;
+        }
+        
+        .section-subtitle {
+            font-size: 1.3rem;
+            text-align: center;
+            color: #6c757d;
+            margin-bottom: 4rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .feature-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            margin: 15px 0;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+            text-align: center;
+            height: 100%;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.12);
+        }
+        
+        .feature-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .feature-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #2c5aa0;
+        }
+        
+        .feature-description {
+            color: #6c757d;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        
+        .stats-section {
+            padding: 80px 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .stat-number {
+            font-size: 3.5rem;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            text-align: center;
+            font-size: 1.2rem;
+            opacity: 0.9;
+            font-weight: 500;
+        }
+        
+        .universities-section {
+            padding: 100px 0;
+            background: #f8f9fa;
+        }
+        
+        .university-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .university-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .university-icon {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+        
+        .university-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #2c5aa0;
+            margin-bottom: 0.5rem;
+        }
+        
+        .university-type {
+            color: #6c757d;
+            font-size: 1rem;
+        }
+        
+        .testimonials-section {
+            padding: 100px 0;
+            background: white;
+        }
+        
+        .testimonial-card {
+            background: #f8f9fa;
+            border-radius: 20px;
+            padding: 40px;
+            margin: 20px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .testimonial-text {
+            font-size: 1.2rem;
+            font-style: italic;
+            color: #555;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+        
+        .testimonial-author {
+            font-weight: 700;
+            color: #2c5aa0;
+        }
+        
+        .cta-section {
+            padding: 120px 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+        }
+        
+        .cta-title {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+        }
+        
+        .cta-subtitle {
+            font-size: 1.4rem;
+            margin-bottom: 3rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .nav-links {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            z-index: 100;
+        }
+        
+        .nav-links a {
+            margin-left: 20px;
+            color: #6c757d;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-links a:hover {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .btn-nav {
+            background: #667eea;
+            color: white;
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-weight: 600;
+        }
+        
+        .btn-nav:hover {
+            background: #5a6fd8;
+            color: white;
+        }
+        
+        .floating-shapes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        
+        .shape {
+            position: absolute;
+            opacity: 0.1;
+        }
+        
+        .shape-1 {
+            top: 10%;
+            right: 10%;
+            width: 100px;
+            height: 100px;
+            background: #667eea;
+            border-radius: 50%;
+        }
+        
+        .shape-2 {
+            bottom: 20%;
+            left: 5%;
+            width: 150px;
+            height: 150px;
+            background: #764ba2;
+            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+        }
+        
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .section-title {
+                font-size: 2.2rem;
+            }
+            
+            .btn-hero, .btn-outline-hero {
+                display: block;
+                margin-right: 0;
+                text-align: center;
+            }
+            
+            .nav-links {
+                position: relative;
+                top: 0;
+                right: 0;
+                text-align: center;
+                margin-bottom: 2rem;
+            }
+            
+            .nav-links a {
+                margin: 0 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Навигация -->
+    <div class="nav-links">
+        <a href="/login">Войти</a>
+        <a href="/register" class="btn-nav">Регистрация</a>
+    </div>
+
+    <!-- Герой секция -->
+    <section class="hero-section">
+        <div class="floating-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+        </div>
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <div class="logo">
+                        <i class="fas fa-graduation-cap"></i> UniMap
+                    </div>
+                    <h1 class="hero-title">
+                        Найдите университет<br>
+                        <span style="color: #764ba2;">вашей мечты</span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        Интерактивная карта лучших университетов Москвы. 
+                        Откройте для себя мир высшего образования в столице — всё в одном месте.
+                    </p>
+                    <div>
+                        <a href="/map" class="btn-hero">
+                            <i class="fas fa-search"></i> Начать поиск
+                        </a>
+                        <a href="#features" class="btn-outline-hero">
+                            <i class="fas fa-info-circle"></i> Узнать больше
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='500' height='400' viewBox='0 0 500 400'><rect width='500' height='400' fill='%23667eea' opacity='0.1' rx='20'/><rect x='50' y='50' width='400' height='300' fill='white' rx='15'/><circle cx='250' cy='120' r='40' fill='%23667eea' opacity='0.8'/><rect x='150' y='190' width='200' height='12' fill='%23e9ecef' rx='6'/><rect x='170' y='220' width='160' height='10' fill='%23e9ecef' rx='5'/><rect x='190' y='250' width='120' height='10' fill='%23e9ecef' rx='5'/><circle cx='180' cy='300' r='8' fill='%23667eea'/><circle cx='220' cy='300' r='8' fill='%23764ba2'/><circle cx='260' cy='300' r='8' fill='%2328a745'/></svg>" 
+                         alt="Карта университетов" class="img-fluid">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Особенности -->
+    <section id="features" class="feature-section">
+        <div class="container">
+            <h2 class="section-title">Почему выбирают UniMap</h2>
+            <p class="section-subtitle">
+                Современный подход к поиску высшего образования в Москве
+            </p>
+            <div class="row">
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-map-marked-alt"></i>
+                        </div>
+                        <h3 class="feature-title">Интерактивная карта</h3>
+                        <p class="feature-description">
+                            Визуальное представление всех университетов Москвы. 
+                            Находите вузы по районам, смотрите расположение на карте.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <h3 class="feature-title">15+ университетов</h3>
+                        <p class="feature-description">
+                            Полная база ведущих вузов столицы. От МГУ до технических 
+                            и гуманитарных университетов.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-filter"></i>
+                        </div>
+                        <h3 class="feature-title">Умный поиск</h3>
+                        <p class="feature-description">
+                            Фильтруйте университеты по типу: федеральные, технические, 
+                            медицинские, гуманитарные и другие.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Статистика -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3 col-6">
+                    <div class="stat-number">15+</div>
+                    <div class="stat-label">Университетов</div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-number">5</div>
+                    <div class="stat-label">Категорий</div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">Бесплатно</div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">Доступ</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Популярные университеты -->
+    <section class="universities-section">
+        <div class="container">
+            <h2 class="section-title">Популярные университеты</h2>
+            <p class="section-subtitle">
+                Лучшие вузы Москвы, представленные на нашей карте
+            </p>
+            <div class="row">
+                <div class="col-lg-3 col-md-6">
+                    <div class="university-card">
+                        <div class="university-icon">
+                            <i class="fas fa-atom"></i>
+                        </div>
+                        <h4 class="university-name">МГУ</h4>
+                        <p class="university-type">Федеральный университет</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="university-card">
+                        <div class="university-icon">
+                            <i class="fas fa-rocket"></i>
+                        </div>
+                        <h4 class="university-name">МФТИ</h4>
+                        <p class="university-type">Технический вуз</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="university-card">
+                        <div class="university-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h4 class="university-name">ВШЭ</h4>
+                        <p class="university-type">Экономический</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="university-card">
+                        <div class="university-icon">
+                            <i class="fas fa-cogs"></i>
+                        </div>
+                        <h4 class="university-name">МГТУ</h4>
+                        <p class="university-type">Технический</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Отзывы -->
+    <section class="testimonials-section">
+        <div class="container">
+            <h2 class="section-title">Отзывы пользователей</h2>
+            <p class="section-subtitle">
+                Что говорят абитуриенты о нашем сервисе
+            </p>
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="testimonial-card">
+                        <p class="testimonial-text">
+                            "Очень удобная карта! Помогла быстро соориентироваться 
+                            в расположении университетов и выбрать подходящий вариант 
+                            рядом с домом."
+                        </p>
+                        <div class="testimonial-author">— Анна, абитуриентка</div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="testimonial-card">
+                        <p class="testimonial-text">
+                            "Как родителю, мне было важно увидеть все вузы на карте. 
+                            Сервис экономит время и помогает принять взвешенное решение."
+                        </p>
+                        <div class="testimonial-author">— Сергей, родитель</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Призыв к действию -->
+    <section class="cta-section">
+        <div class="container">
+            <h2 class="cta-title">Готовы найти свой университет?</h2>
+            <p class="cta-subtitle">
+                Присоединяйтесь к тысячам абитуриентов, которые уже используют UniMap 
+                для поиска идеального вуза в Москве
+            </p>
+            <a href="/map" class="btn-hero" style="background: white; color: #667eea;">
+                <i class="fas fa-play"></i> Начать поиск сейчас
+            </a>
+        </div>
+    </section>
+
+    <!-- Футер -->
+    <footer style="background: #2c5aa0; color: white; padding: 40px 0; text-align: center;">
+        <div class="container">
+            <div class="logo" style="font-size: 2rem; margin-bottom: 1rem;">
+                <i class="fas fa-graduation-cap"></i> UniMap
+            </div>
+            <p style="opacity: 0.8; margin-bottom: 2rem;">
+                Интерактивная карта университетов Москвы — ваш надежный помощник в выборе образования
+            </p>
+            <p style="opacity: 0.6; font-size: 0.9rem;">
+                &copy; 2025 UniMap. Все права защищены.
+            </p>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Плавная прокрутка для якорных ссылок
+        $(document).ready(function() {
+            $('a[href^="#"]').on('click', function(event) {
+                var target = $(this.getAttribute('href'));
+                if (target.length) {
+                    event.preventDefault();
+                    $('html, body').stop().animate({
+                        scrollTop: target.offset().top - 80
+                    }, 1000);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

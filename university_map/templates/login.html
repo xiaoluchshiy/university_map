@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход - UniMap</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+        
+        .login-container {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+        }
+        
+        .left-section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: white;
+            position: relative;
+        }
+        
+        .home-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 10px;
+            padding: 10px 15px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .home-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            text-decoration: none;
+            transform: translateY(-2px);
+        }
+        
+        .hero-content {
+            max-width: 500px;
+        }
+        
+        .logo {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+        
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+        
+        .features {
+            margin-top: 2rem;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+        
+        .feature-icon {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .right-section {
+            width: 400px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .form-container {
+            width: 100%;
+        }
+        
+        .form-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #2c5aa0;
+        }
+        
+        .form-subtitle {
+            color: #6c757d;
+            margin-bottom: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 12px 15px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn-login {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+            width: 100%;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .remember-me {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .remember-me input {
+            margin-right: 8px;
+        }
+        
+        .divider {
+            text-align: center;
+            margin: 2rem 0;
+            color: #6c757d;
+            position: relative;
+        }
+        
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e9ecef;
+        }
+        
+        .divider span {
+            background: white;
+            padding: 0 15px;
+            position: relative;
+        }
+        
+        .register-link {
+            text-align: center;
+            margin-top: 1rem;
+        }
+        
+        .register-link a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .alert {
+            border-radius: 10px;
+            border: none;
+            padding: 15px;
+            margin-bottom: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .login-container {
+                flex-direction: column;
+            }
+            
+            .right-section {
+                width: 100%;
+            }
+            
+            .left-section {
+                padding: 20px;
+            }
+            
+            .home-btn {
+                top: 10px;
+                left: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <!-- Левая секция - информация -->
+        <div class="left-section">
+            <!-- Кнопка "На главную" -->
+            <a href="/" class="home-btn">
+                <i class="fas fa-arrow-left"></i> На главную
+            </a>
+            
+            <div class="hero-content">
+                <div class="logo">
+                    <i class="fas fa-graduation-cap"></i> UniMap
+                </div>
+                <h1 class="hero-title">
+                    Найдите и сохраните своё будущее
+                </h1>
+                <p class="hero-subtitle">
+                    Интерактивный сервис для абитуриентов и студентов Москвы: 
+                    быстро ищите университеты, сравнивайте и сохраняйте любимые в избранное.
+                </p>
+                
+                <div class="features">
+                    <div class="feature-item">
+                        <span class="feature-icon">🗺️</span>
+                        Поиск университетов на карте
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">⭐</span>
+                        Сохранение в избранное
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">📊</span>
+                        Сравнение программ обучения
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🔔</span>
+                        Напоминания о дедлайнах
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Правая секция - форма -->
+        <div class="right-section">
+            <div class="form-container">
+                <h2 class="form-title">Вход в аккаунт</h2>
+                <p class="form-subtitle">Войдите чтобы продолжить работу</p>
+                
+                <form action="" method="post">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="form-group">
+                        <label class="form-label">Email адрес</label>
+                        {{ form.email(class="form-control", placeholder="your@email.com") }}
+                        {% for error in form.email.errors %}
+                            <div class="alert alert-danger mt-2">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Пароль</label>
+                        {{ form.password(class="form-control", type="password", placeholder="Введите пароль") }}
+                        {% for error in form.password.errors %}
+                            <div class="alert alert-danger mt-2">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="remember-me">
+                        {{ form.remember_me() }}
+                        <label class="form-label" style="margin: 0;">Запомнить меня</label>
+                    </div>
+                    
+                    {{ form.submit(class="btn-login", type="submit") }}
+                    
+                    {% if message %}
+                        <div class="alert alert-danger">
+                            {{ message }}
+                        </div>
+                    {% endif %}
+                </form>
+                
+                <div class="divider">
+                    <span>Нет аккаунта?</span>
+                </div>
+                
+                <div class="register-link">
+                    <a href="/register">Создать новый аккаунт</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

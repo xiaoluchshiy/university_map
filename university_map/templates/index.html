@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniMap - Карта университетов</title>
+
+    <!-- Яндекс Карты -->
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=58536896-e96c-40b7-a0c7-f6717d975d29&lang=ru_RU"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a1a;
+            overflow: hidden;
+        }
+
+        /* КАРТА НА ВЕСЬ ЭКРАН */
+        #map {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+        }
+
+        /* ПАНЕЛЬ УПРАВЛЕНИЯ */
+        .control-panel {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .control-btn {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: none;
+            border-radius: 12px;
+            padding: 12px 18px;
+            font-weight: 600;
+            color: #333;
+            text-decoration: none;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 140px;
+        }
+
+        .control-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.3);
+            text-decoration: none;
+        }
+
+        .user-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            min-width: 160px;
+        }
+
+        .user-info {
+            font-weight: 600;
+            color: #2c5aa0;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        /* ФИЛЬТРЫ */
+        .filter-panel {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            min-width: 250px;
+        }
+
+        .filter-title {
+            font-weight: 700;
+            color: #2c5aa0;
+            margin-bottom: 15px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-group {
+            margin-bottom: 15px;
+        }
+
+        .filter-label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            transition: border-color 0.3s ease;
+        }
+
+        .filter-select:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+
+        .filter-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+
+        .filter-checkbox input {
+            margin: 0;
+        }
+
+        /* СТАТУС БАР */
+        .status-bar {
+            position: fixed;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 12px 20px;
+            font-size: 14px;
+            color: #333;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .university-count {
+            background: #667eea;
+            color: white;
+            border-radius: 15px;
+            padding: 4px 12px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+            /* ИНФОРМАЦИОННАЯ ПАНЕЛЬ - ЕЩЕ НИЖЕ */
+        .info-panel {
+            position: fixed;
+            top: 300px; /* Еще ниже */
+            left: 15px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 13px;
+            color: #333;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+            max-width: 300px;
+            backdrop-filter: blur(10px);
+            line-height: 1.4;
+        }
+
+        .info-title {
+            font-weight: 700;
+            color: #2c5aa0;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        /* АДАПТИВНОСТЬ */
+        @media (max-width: 768px) {
+            .control-panel {
+                flex-direction: row;
+                flex-wrap: wrap;
+                right: 15px;
+                left: 15px;
+            }
+
+            .filter-panel {
+                top: 80px;
+                right: 15px;
+                left: 15px;
+            }
+
+            .info-panel {
+                top: 280px;
+                left: 15px;
+                right: 15px;
+                max-width: none;
+            }
+
+            .control-btn {
+                min-width: auto;
+                flex: 1;
+            }
+        }
+
+        /* АНИМАЦИИ */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* СТИЛИ ДЛЯ КНОПОК ИЗБРАННОГО */
+        .favorite-btn {
+            transition: all 0.3s ease;
+        }
+
+        .favorite-btn:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <!-- ОСНОВНАЯ КАРТА -->
+    <div id="map"></div>
+
+    <!-- ПАНЕЛЬ УПРАВЛЕНИЯ -->
+    <div class="control-panel">
+        <a href="/" class="control-btn">
+            <i class="fas fa-home"></i> Главная
+        </a>
+
+        {% if current_user.is_authenticated %}
+            <div class="user-menu fade-in">
+                <div class="user-info">
+                    <i class="fas fa-user"></i> {{ current_user.name }}
+                </div>
+                <a href="/profile" class="control-btn" style="background: rgba(102, 126, 234, 0.1);">
+                    <i class="fas fa-user-circle"></i> Кабинет
+                </a>
+                <a href="/favorites" class="control-btn" style="background: rgba(231, 76, 60, 0.1);">
+                    <i class="fas fa-heart"></i> Избранное
+                </a>
+                <a href="/logout" class="control-btn" style="background: rgba(108, 117, 125, 0.1);">
+                    <i class="fas fa-sign-out-alt"></i> Выйти
+                </a>
+            </div>
+        {% else %}
+            <a href="/login" class="control-btn">
+                <i class="fas fa-sign-in-alt"></i> Войти
+            </a>
+            <a href="/register" class="control-btn">
+                <i class="fas fa-user-plus"></i> Регистрация
+            </a>
+        {% endif %}
+    </div>
+
+    <!-- ПАНЕЛЬ ФИЛЬТРОВ -->
+    <div class="filter-panel fade-in">
+        <div class="filter-title">
+            <i class="fas fa-filter"></i> Фильтры
+        </div>
+
+        <div class="filter-group">
+            <label class="filter-label">Тип университета:</label>
+            <select class="filter-select" id="typeFilter">
+                <option value="all">Все типы</option>
+                <option value="federal">Федеральные</option>
+                <option value="technical">Технические</option>
+                <option value="medical">Медицинские</option>
+                <option value="pedagogical">Педагогические</option>
+                <option value="humanitarian">Гуманитарные</option>
+                <option value="economic">Экономические</option>
+                <option value="architecture">Архитектурные</option>
+                <option value="linguistic">Лингвистические</option>
+                <option value="social">Социальные</option>
+                <option value="veterinary">Ветеринарные</option>
+                <option value="food_tech">Пищевые технологии</option>
+                <option value="technology">Технологические</option>
+                <option value="art">Искусство</option>
+                <option value="culture">Культура</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label class="filter-label">Показать:</label>
+            <div class="filter-checkbox">
+                <input type="checkbox" id="showFavorites" checked>
+                <label for="showFavorites">Все университеты</label>
+            </div>
+            {% if current_user.is_authenticated %}
+            <div class="filter-checkbox">
+                <input type="checkbox" id="onlyFavorites">
+                <label for="onlyFavorites">Только избранные</label>
+            </div>
+            {% endif %}
+        </div>
+
+        <button class="control-btn" onclick="applyFilters()" style="width: 100%; justify-content: center;">
+            <i class="fas fa-check"></i> Применить
+        </button>
+    </div>
+
+    <!-- ИНФОРМАЦИОННАЯ ПАНЕЛЬ -->
+    <div class="info-panel fade-in" id="infoPanel">
+        <div class="info-title">
+            <i class="fas fa-info-circle"></i> UniMap Карта
+        </div>
+        <div id="infoContent">
+            🗺️ Загружаем карту университетов Москвы...
+        </div>
+    </div>
+
+    <!-- СТАТУС БАР -->
+    <div class="status-bar fade-in">
+        <i class="fas fa-university"></i>
+        <span id="statusText">Загрузка университетов...</span>
+        <span class="university-count" id="universityCount">0</span>
+    </div>
+
+    <script>
+        // ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
+        let map;
+        let allPlacemarks = [];
+        let currentFilter = 'all';
+        let showOnlyFavorites = false;
+
+        // ДАННЫЕ ИЗ ШАБЛОНА
+        const universities = {{ places|tojson }};
+        const isAuthenticated = {{ current_user.is_authenticated|tojson }};
+
+        // ФУНКЦИЯ ОБНОВЛЕНИЯ ИНФОРМАЦИИ
+        function updateInfo(message, type = 'info') {
+            const infoEl = document.getElementById('infoContent');
+            const statusEl = document.getElementById('statusText');
+            const countEl = document.getElementById('universityCount');
+
+            infoEl.textContent = message;
+            statusEl.textContent = message;
+
+            // Обновляем счетчик
+            const visibleCount = allPlacemarks.filter(pm => pm.options.get('visible')).length;
+            countEl.textContent = visibleCount;
+
+            // Цвет в зависимости от типа сообщения
+            const colors = {
+                'info': '#667eea',
+                'success': '#28a745',
+                'error': '#dc3545',
+                'warning': '#ffc107'
+            };
+
+            if (colors[type]) {
+                countEl.style.background = colors[type];
+            }
+
+            console.log('INFO:', message);
+        }
+
+        // ФУНКЦИИ ДЛЯ РАБОТЫ С ТИПАМИ
+        function getTypeIcon(type) {
+            const icons = {
+                'federal': '🏛️', 'technical': '🔧', 'medical': '⚕️', 'pedagogical': '👨‍🏫',
+                'humanitarian': '📚', 'economic': '💼', 'architecture': '🏗️', 'linguistic': '🔤',
+                'social': '👥', 'veterinary': '🐾', 'food_tech': '🍕', 'technology': '⚙️',
+                'art': '🎨', 'culture': '🎭'
+            };
+            return icons[type] || '🎓';
+        }
+
+        function getTypeName(type) {
+            const types = {
+                'federal': 'Федеральный университет', 'technical': 'Технический вуз',
+                'medical': 'Медицинский университет', 'pedagogical': 'Педагогический университет',
+                'humanitarian': 'Гуманитарный университет', 'economic': 'Экономический университет',
+                'architecture': 'Архитектурный институт', 'linguistic': 'Лингвистический университет',
+                'social': 'Социальный университет', 'veterinary': 'Ветеринарная академия',
+                'food_tech': 'Пищевой университет', 'technology': 'Технологический университет',
+                'art': 'Художественная академия', 'culture': 'Институт культуры'
+            };
+            return types[type] || 'Университет';
+        }
+
+        function getTypeColor(type) {
+            const colors = {
+                'federal': '#4a6fc9', 'technical': '#e74c3c', 'medical': '#2ecc71',
+                'pedagogical': '#9b59b6', 'humanitarian': '#3498db', 'economic': '#f39c12',
+                'architecture': '#e67e22', 'linguistic': '#1abc9c', 'social': '#95a5a6',
+                'veterinary': '#8e44ad', 'food_tech': '#d35400', 'technology': '#c0392b',
+                'art': '#e84393', 'culture': '#0984e3'
+            };
+            return colors[type] || '#667eea';
+        }
+
+        // ФУНКЦИЯ ПЕРЕКЛЮЧЕНИЯ ИЗБРАННОГО
+        function toggleFavorite(universityId, button) {
+            if (!isAuthenticated) {
+                alert('Пожалуйста, войдите в систему чтобы добавлять университеты в избранное');
+                return;
+            }
+
+            fetch('/toggle_favorite/' + universityId, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Обновляем иконку кнопки
+                    if (data.action === 'added') {
+                        button.innerHTML = '<i class="fas fa-heart"></i> В избранном';
+                        button.classList.remove('btn-outline-danger');
+                        button.classList.add('btn-danger');
+                    } else {
+                        button.innerHTML = '<i class="far fa-heart"></i> В избранное';
+                        button.classList.remove('btn-danger');
+                        button.classList.add('btn-outline-danger');
+                    }
+
+                    // Обновляем фильтр если включен режим "Только избранные"
+                    if (showOnlyFavorites) {
+                        applyFilters();
+                    }
+                } else {
+                    alert('Ошибка: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Произошла ошибка при обновлении избранного');
+            });
+        }
+
+        // ФУНКЦИЯ ПРИМЕНЕНИЯ ФИЛЬТРОВ
+        function applyFilters() {
+            const typeFilter = document.getElementById('typeFilter').value;
+            const onlyFavorites = document.getElementById('onlyFavorites')?.checked || false;
+
+            currentFilter = typeFilter;
+            showOnlyFavorites = onlyFavorites;
+
+            let visibleCount = 0;
+
+            allPlacemarks.forEach(placemark => {
+                const universityData = placemark.properties.get('balloonContentData');
+                let shouldShow = true;
+
+                // Фильтр по типу
+                if (typeFilter !== 'all' && universityData.type !== typeFilter) {
+                    shouldShow = false;
+                }
+
+                // Фильтр по избранному
+                if (onlyFavorites && !universityData.is_favorite) {
+                    shouldShow = false;
+                }
+
+                placemark.options.set('visible', shouldShow);
+
+                if (shouldShow) {
+                    visibleCount++;
+                }
+            });
+
+            updateInfo(`Показано: ${visibleCount} университетов`, 'success');
+        }
+
+        // ОСНОВНАЯ ФУНКЦИЯ ИНИЦИАЛИЗАЦИИ КАРТЫ
+        function initMap() {
+            try {
+                updateInfo('🗺️ Инициализация карты...');
+
+                // СОЗДАЕМ КАРТУ
+                map = new ymaps.Map('map', {
+                    center: [55.7558, 37.6176], // Москва
+                    zoom: 10,
+                    controls: ['zoomControl', 'fullscreenControl', 'typeSelector', 'searchControl']
+                });
+
+                updateInfo('✅ Карта создана! Добавляем университеты...');
+
+                // ДОБАВЛЯЕМ МЕТКИ УНИВЕРСИТЕТОВ
+                universities.forEach((place, index) => {
+                    try {
+                        const iconColor = getTypeColor(place.type);
+
+                        const placemark = new ymaps.Placemark(
+                            [place.lat, place.lon],
+                            {
+                                balloonContentHeader: `
+                                    <div style="color: #2c5aa0; font-weight: 700; font-size: 16px; margin-bottom: 8px;">
+                                        ${getTypeIcon(place.type)} ${place.title}
+                                    </div>
+                                `,
+                                balloonContentBody: `
+                                    <div style="max-width: 280px;">
+                                        <div style="margin-bottom: 12px;">
+                                            <strong>Тип:</strong> ${getTypeName(place.type)}<br>
+                                            <strong>Координаты:</strong> ${place.lat.toFixed(4)}, ${place.lon.toFixed(4)}
+                                        </div>
+                                        <div style="border-top: 1px solid #eee; padding-top: 12px;">
+                                            <button onclick="toggleFavorite(${place.id}, this)"
+                                                    class="btn ${place.is_favorite ? 'btn-danger' : 'btn-outline-danger'} btn-sm favorite-btn"
+                                                    style="width: 100%;">
+                                                <i class="${place.is_favorite ? 'fas' : 'far'} fa-heart"></i>
+                                                ${place.is_favorite ? 'В избранном' : 'В избранное'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                `,
+                                hintContent: `${getTypeIcon(place.type)} ${place.title}`,
+                                balloonContentData: place // Сохраняем все данные
+                            },
+                            {
+                                preset: 'islands#circleIcon',
+                                iconColor: iconColor,
+                                iconCaptionMaxWidth: '200'
+                            }
+                        );
+
+                        // ДОБАВЛЯЕМ МЕТКУ НА КАРТУ
+                        map.geoObjects.add(placemark);
+                        allPlacemarks.push(placemark);
+
+                    } catch (error) {
+                        console.error(`❌ Ошибка с университетом ${place.title}:`, error);
+                    }
+                });
+
+                updateInfo(`✅ Готово! Загружено ${universities.length} университетов`, 'success');
+
+                // ОБРАБОТЧИКИ СОБЫТИЙ КАРТЫ
+                map.events.add('boundschange', function() {
+                    const visibleCount = allPlacemarks.filter(pm => pm.options.get('visible')).length;
+                    updateInfo(`Показано: ${visibleCount} университетов`, 'info');
+                });
+
+                map.events.add('error', function(e) {
+                    updateInfo('❌ Ошибка карты: ' + e.get('error').message, 'error');
+                });
+
+                map.events.add('load', function() {
+                    updateInfo('🗺️ Карта полностью загружена!', 'success');
+                });
+
+                // АВТОМАТИЧЕСКОЕ ПРИМЕНЕНИЕ ФИЛЬТРОВ ПРИ ИЗМЕНЕНИИ
+                document.getElementById('typeFilter').addEventListener('change', applyFilters);
+                if (document.getElementById('onlyFavorites')) {
+                    document.getElementById('onlyFavorites').addEventListener('change', applyFilters);
+                }
+                document.getElementById('showFavorites').addEventListener('change', function() {
+                    if (this.checked) {
+                        document.getElementById('onlyFavorites').checked = false;
+                        applyFilters();
+                    }
+                });
+
+            } catch (error) {
+                updateInfo('❌ Критическая ошибка: ' + error.message, 'error');
+                console.error('Ошибка инициализации карты:', error);
+            }
+        }
+
+        // ПРОВЕРКА ЗАГРУЗКИ YANDEX MAPS
+        if (typeof ymaps === 'undefined') {
+            updateInfo('❌ Yandex Maps API не загружен', 'error');
+        } else {
+            updateInfo('✅ Yandex Maps API загружен', 'success');
+
+            // ЗАПУСКАЕМ ИНИЦИАЛИЗАЦИЮ КАРТЫ
+            ymaps.ready(initMap);
+        }
+
+        // ТАЙМАУТ НА СЛУЧАЙ ЕСЛИ КАРТА НЕ ГРУЗИТСЯ
+        setTimeout(() => {
+            const infoText = document.getElementById('infoContent').textContent;
+            if (infoText.includes('Загружаем карту') || infoText.includes('Yandex Maps API не загружен')) {
+                updateInfo('❌ Таймаут загрузки. Проверьте подключение к интернету', 'error');
+            }
+        }, 10000);
+
+        // СКРЫВАЕМ ИНФО ПАНЕЛЬ ПРИ КЛИКЕ НА КАРТУ
+        document.getElementById('map').addEventListener('click', function() {
+            const infoPanel = document.getElementById('infoPanel');
+            infoPanel.style.opacity = '0.7';
+
+            setTimeout(() => {
+                infoPanel.style.opacity = '1';
+            }, 3000);
+        });
+
+        // ОБРАБОТКА КЛАВИШ
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                // Закрываем все открытые балуны
+                allPlacemarks.forEach(pm => {
+                    pm.balloon.close();
+                });
+            }
+        });
+    </script>
+</body>
+</html>
