@@ -56,10 +56,10 @@ def index():
                         'title': uni.title,
                         'lat': lat,
                         'lon': lon,
-                        'type': uni.type if uni.type else 'federal',
-                        'user_name': uni.user.name if uni.user else 'Система',
-                        'is_owner': False,
-                        'is_favorite': is_favorite  # Добавляем информацию об избранном
+                        'type': uni.type,
+                        'is_favorite': is_favorite,  # Добавляем информацию об избранном
+                        'website': uni.website,
+                        'description': uni.description
                     })
                 except (ValueError, IndexError) as e:
                     print(f"Ошибка обработки координат для {uni.title}: {e}")
@@ -99,8 +99,9 @@ def favorites():
                     'title': uni.title,
                     'lat': lat,
                     'lon': lon,
-                    'type': uni.type if uni.type else 'federal',  # Убедитесь что тип передается
-                    'user_name': uni.user.name if uni.user else 'Система'
+                    'type': uni.type,
+                    'website': uni.website,
+                    'description': uni.description
                 })
             except (ValueError, IndexError) as e:
                 continue

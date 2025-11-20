@@ -129,6 +129,51 @@
             font-size: 0.8rem;
             font-weight: 600;
         }
+
+        /* Обновленные стили для кнопок */
+        .btn-modern {
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-show-map {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-show-map:hover {
+            background: linear-gradient(135deg, #5a6fd8, #6a4190);
+            color: white;
+        }
+
+        .btn-remove {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+        }
+
+        .btn-remove:hover {
+            background: linear-gradient(135deg, #ff5252, #e53935);
+            color: white;
+        }
+
+        .buttons-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -182,11 +227,11 @@
                         <div class="university-coords">
                             <strong>Координаты:</strong> {{ "%.4f, %.4f"|format(uni.lat, uni.lon) }}
                         </div>
-                        <div class="d-flex gap-2">
-                            <a href="/map" class="btn btn-outline-primary btn-sm">
+                        <div class="buttons-container">
+                            <a href="/map" class="btn-modern btn-show-map">
                                 <i class="fas fa-map-marker-alt"></i> Показать на карте
                             </a>
-                            <button class="btn btn-outline-danger btn-sm remove-favorite" data-id="{{ uni.id }}">
+                            <button class="btn-modern btn-remove remove-favorite" data-id="{{ uni.id }}">
                                 <i class="fas fa-trash"></i> Удалить
                             </button>
                         </div>
@@ -283,23 +328,6 @@
                         console.error('Error:', error);
                         alert('Произошла ошибка');
                     });
-                });
-            });
-        });
-
-        // Альтернативный вариант с jQuery (оставляем для совместимости)
-        $(document).ready(function() {
-            $('.remove-favorite').click(function() {
-                const universityId = $(this).data('id');
-                const card = $(this).closest('.favorite-card');
-
-                $.post('/toggle_favorite/' + universityId, function(response) {
-                    if (response.success) {
-                        card.fadeOut(300, function() {
-                            $(this).remove();
-                            location.reload();
-                        });
-                    }
                 });
             });
         });

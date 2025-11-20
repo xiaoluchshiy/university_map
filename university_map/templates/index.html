@@ -153,58 +153,6 @@
             margin: 0;
         }
 
-        /* СТАТУС БАР */
-        .status-bar {
-            position: fixed;
-            bottom: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1000;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 10px;
-            padding: 12px 20px;
-            font-size: 14px;
-            color: #333;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .university-count {
-            background: #667eea;
-            color: white;
-            border-radius: 15px;
-            padding: 4px 12px;
-            font-weight: 600;
-            font-size: 12px;
-        }
-
-            /* ИНФОРМАЦИОННАЯ ПАНЕЛЬ - ЕЩЕ НИЖЕ */
-        .info-panel {
-            position: fixed;
-            top: 300px; /* Еще ниже */
-            left: 15px;
-            z-index: 1000;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 15px;
-            border-radius: 10px;
-            font-size: 13px;
-            color: #333;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
-            max-width: 300px;
-            backdrop-filter: blur(10px);
-            line-height: 1.4;
-        }
-
-        .info-title {
-            font-weight: 700;
-            color: #2c5aa0;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
         /* АДАПТИВНОСТЬ */
         @media (max-width: 768px) {
             .control-panel {
@@ -218,13 +166,6 @@
                 top: 80px;
                 right: 15px;
                 left: 15px;
-            }
-
-            .info-panel {
-                top: 280px;
-                left: 15px;
-                right: 15px;
-                max-width: none;
             }
 
             .control-btn {
@@ -312,15 +253,12 @@
                 <option value="technology">Технологические</option>
                 <option value="art">Искусство</option>
                 <option value="culture">Культура</option>
+                <option value="space">Космические</option>
             </select>
         </div>
 
         <div class="filter-group">
             <label class="filter-label">Показать:</label>
-            <div class="filter-checkbox">
-                <input type="checkbox" id="showFavorites" checked>
-                <label for="showFavorites">Все университеты</label>
-            </div>
             {% if current_user.is_authenticated %}
             <div class="filter-checkbox">
                 <input type="checkbox" id="onlyFavorites">
@@ -328,27 +266,6 @@
             </div>
             {% endif %}
         </div>
-
-        <button class="control-btn" onclick="applyFilters()" style="width: 100%; justify-content: center;">
-            <i class="fas fa-check"></i> Применить
-        </button>
-    </div>
-
-    <!-- ИНФОРМАЦИОННАЯ ПАНЕЛЬ -->
-    <div class="info-panel fade-in" id="infoPanel">
-        <div class="info-title">
-            <i class="fas fa-info-circle"></i> UniMap Карта
-        </div>
-        <div id="infoContent">
-            🗺️ Загружаем карту университетов Москвы...
-        </div>
-    </div>
-
-    <!-- СТАТУС БАР -->
-    <div class="status-bar fade-in">
-        <i class="fas fa-university"></i>
-        <span id="statusText">Загрузка университетов...</span>
-        <span class="university-count" id="universityCount">0</span>
     </div>
 
     <script>
@@ -362,32 +279,9 @@
         const universities = {{ places|tojson }};
         const isAuthenticated = {{ current_user.is_authenticated|tojson }};
 
-        // ФУНКЦИЯ ОБНОВЛЕНИЯ ИНФОРМАЦИИ
-        function updateInfo(message, type = 'info') {
-            const infoEl = document.getElementById('infoContent');
-            const statusEl = document.getElementById('statusText');
-            const countEl = document.getElementById('universityCount');
-
-            infoEl.textContent = message;
-            statusEl.textContent = message;
-
-            // Обновляем счетчик
-            const visibleCount = allPlacemarks.filter(pm => pm.options.get('visible')).length;
-            countEl.textContent = visibleCount;
-
-            // Цвет в зависимости от типа сообщения
-            const colors = {
-                'info': '#667eea',
-                'success': '#28a745',
-                'error': '#dc3545',
-                'warning': '#ffc107'
-            };
-
-            if (colors[type]) {
-                countEl.style.background = colors[type];
-            }
-
-            console.log('INFO:', message);
+        // ФУНКЦИЯ ОБНОВЛЕНИЯ СТАТУСА
+        function updateStatus(message, type = 'info') {
+            console.log('STATUS:', message);
         }
 
         // ФУНКЦИИ ДЛЯ РАБОТЫ С ТИПАМИ
@@ -396,7 +290,7 @@
                 'federal': '🏛️', 'technical': '🔧', 'medical': '⚕️', 'pedagogical': '👨‍🏫',
                 'humanitarian': '📚', 'economic': '💼', 'architecture': '🏗️', 'linguistic': '🔤',
                 'social': '👥', 'veterinary': '🐾', 'food_tech': '🍕', 'technology': '⚙️',
-                'art': '🎨', 'culture': '🎭'
+                'art': '🎨', 'culture': '🎭', 'space': '🚀'
             };
             return icons[type] || '🎓';
         }
@@ -409,7 +303,8 @@
                 'architecture': 'Архитектурный институт', 'linguistic': 'Лингвистический университет',
                 'social': 'Социальный университет', 'veterinary': 'Ветеринарная академия',
                 'food_tech': 'Пищевой университет', 'technology': 'Технологический университет',
-                'art': 'Художественная академия', 'culture': 'Институт культуры'
+                'art': 'Художественная академия', 'culture': 'Институт культуры',
+                'space': 'Космический университет'
             };
             return types[type] || 'Университет';
         }
@@ -420,18 +315,42 @@
                 'pedagogical': '#9b59b6', 'humanitarian': '#3498db', 'economic': '#f39c12',
                 'architecture': '#e67e22', 'linguistic': '#1abc9c', 'social': '#95a5a6',
                 'veterinary': '#8e44ad', 'food_tech': '#d35400', 'technology': '#c0392b',
-                'art': '#e84393', 'culture': '#0984e3'
+                'art': '#e84393', 'culture': '#0984e3', 'space': '#8e44ad'
             };
             return colors[type] || '#667eea';
         }
 
-        // ФУНКЦИЯ ПЕРЕКЛЮЧЕНИЯ ИЗБРАННОГО
+        // ФУНКЦИЯ ПЕРЕКЛЮЧЕНИЯ ИЗБРАННОГО (С МГНОВЕННЫМ ИЗМЕНЕНИЕМ)
         function toggleFavorite(universityId, button) {
             if (!isAuthenticated) {
-                alert('Пожалуйста, войдите в систему чтобы добавлять университеты в избранное');
                 return;
             }
 
+            // Сохраняем исходное состояние для отката при ошибке
+            const originalHTML = button.innerHTML;
+            const originalBackground = button.style.background;
+            const originalColor = button.style.color;
+            const originalBorder = button.style.border;
+            const originalBoxShadow = button.style.boxShadow;
+
+            // Мгновенно меняем внешний вид кнопки
+            if (button.innerHTML.includes('far fa-heart')) {
+                // Меняем на "в избранном" - красный
+                button.innerHTML = '<i class="fas fa-heart"></i> В избранном';
+                button.style.background = 'linear-gradient(135deg, #e53e3e 0%, #c53030 100%)';
+                button.style.color = 'white';
+                button.style.border = 'none';
+                button.style.boxShadow = '0 3px 8px rgba(229, 62, 62, 0.3)';
+            } else {
+                // Меняем на "в избранное" - белый с красной рамкой
+                button.innerHTML = '<i class="far fa-heart"></i> В избранное';
+                button.style.background = 'white';
+                button.style.color = '#e53e3e';
+                button.style.border = '2px solid #e53e3e';
+                button.style.boxShadow = '0 3px 8px rgba(0,0,0,0.1)';
+            }
+
+            // Отправляем запрос на сервер
             fetch('/toggle_favorite/' + universityId, {
                 method: 'POST',
                 headers: {
@@ -441,15 +360,13 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Обновляем иконку кнопки
-                    if (data.action === 'added') {
-                        button.innerHTML = '<i class="fas fa-heart"></i> В избранном';
-                        button.classList.remove('btn-outline-danger');
-                        button.classList.add('btn-danger');
-                    } else {
-                        button.innerHTML = '<i class="far fa-heart"></i> В избранное';
-                        button.classList.remove('btn-danger');
-                        button.classList.add('btn-outline-danger');
+                    // Обновляем данные в placemark
+                    const placemark = allPlacemarks.find(pm =>
+                        pm.properties.get('balloonContentData').id === universityId
+                    );
+                    if (placemark) {
+                        const universityData = placemark.properties.get('balloonContentData');
+                        universityData.is_favorite = data.action === 'added';
                     }
 
                     // Обновляем фильтр если включен режим "Только избранные"
@@ -457,12 +374,22 @@
                         applyFilters();
                     }
                 } else {
-                    alert('Ошибка: ' + data.error);
+                    // Если ошибка, возвращаем кнопку в исходное состояние
+                    button.innerHTML = originalHTML;
+                    button.style.background = originalBackground;
+                    button.style.color = originalColor;
+                    button.style.border = originalBorder;
+                    button.style.boxShadow = originalBoxShadow;
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Произошла ошибка при обновлении избранного');
+                // В случае ошибки возвращаем кнопку в исходное состояние
+                button.innerHTML = originalHTML;
+                button.style.background = originalBackground;
+                button.style.color = originalColor;
+                button.style.border = originalBorder;
+                button.style.boxShadow = originalBoxShadow;
             });
         }
 
@@ -497,54 +424,210 @@
                 }
             });
 
-            updateInfo(`Показано: ${visibleCount} университетов`, 'success');
+            updateStatus(`Показано: ${visibleCount} университетов`, 'success');
         }
 
         // ОСНОВНАЯ ФУНКЦИЯ ИНИЦИАЛИЗАЦИИ КАРТЫ
         function initMap() {
             try {
-                updateInfo('🗺️ Инициализация карты...');
-
                 // СОЗДАЕМ КАРТУ
                 map = new ymaps.Map('map', {
                     center: [55.7558, 37.6176], // Москва
                     zoom: 10,
-                    controls: ['zoomControl', 'fullscreenControl', 'typeSelector', 'searchControl']
+                    controls: []
                 });
-
-                updateInfo('✅ Карта создана! Добавляем университеты...');
 
                 // ДОБАВЛЯЕМ МЕТКИ УНИВЕРСИТЕТОВ
                 universities.forEach((place, index) => {
                     try {
                         const iconColor = getTypeColor(place.type);
-
                         const placemark = new ymaps.Placemark(
                             [place.lat, place.lon],
                             {
                                 balloonContentHeader: `
-                                    <div style="color: #2c5aa0; font-weight: 700; font-size: 16px; margin-bottom: 8px;">
-                                        ${getTypeIcon(place.type)} ${place.title}
+                                    <div style="
+                                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                        color: white;
+                                        font-weight: 700;
+                                        padding: 12px;
+                                        border-radius: 10px 10px 0 0;
+                                        font-size: 14px;
+                                        text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+                                    ">
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <span style="font-size: 18px;">${getTypeIcon(place.type)}</span>
+                                            <span style="font-size: 13px;">${place.title}</span>
+                                        </div>
                                     </div>
                                 `,
                                 balloonContentBody: `
-                                    <div style="max-width: 280px;">
-                                        <div style="margin-bottom: 12px;">
-                                            <strong>Тип:</strong> ${getTypeName(place.type)}<br>
-                                            <strong>Координаты:</strong> ${place.lat.toFixed(4)}, ${place.lon.toFixed(4)}
+                                    <div style="
+                                        padding: 12px;
+                                        width: 280px;
+                                        background: #f8f9fa;
+                                        border-radius: 0 0 10px 10px;
+                                        max-height: 350px;
+                                        overflow-y: auto;
+                                    ">
+                                        <!-- Информационная карточка -->
+                                        <div style="
+                                            background: white;
+                                            padding: 10px;
+                                            border-radius: 8px;
+                                            margin-bottom: 10px;
+                                            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+                                            border: 1px solid #e9ecef;
+                                        ">
+                                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                                <div style="
+                                                    background: #667eea;
+                                                    width: 24px;
+                                                    height: 24px;
+                                                    border-radius: 6px;
+                                                    display: flex;
+                                                    align-items: center;
+                                                    justify-content: center;
+                                                    color: white;
+                                                    font-size: 11px;
+                                                ">
+                                                    <i class="fas fa-tag"></i>
+                                                </div>
+                                                <div>
+                                                    <div style="font-weight: 600; color: #495057; font-size: 10px;">ТИП</div>
+                                                    <div style="color: #667eea; font-weight: 700; font-size: 11px;">${getTypeName(place.type)}</div>
+                                                </div>
+                                            </div>
+
+                                            <div style="display: flex; align-items: center; gap: 8px;">
+                                                <div style="
+                                                    background: #10b981;
+                                                    width: 24px;
+                                                    height: 24px;
+                                                    border-radius: 6px;
+                                                    display: flex;
+                                                    align-items: center;
+                                                    justify-content: center;
+                                                    color: white;
+                                                    font-size: 11px;
+                                                ">
+                                                    <i class="fas fa-map-marker-alt"></i>
+                                                </div>
+                                                <div>
+                                                    <div style="font-weight: 600; color: #495057; font-size: 10px;">КООРДИНАТЫ</div>
+                                                    <div style="color: #10b981; font-weight: 700; font-size: 10px;">
+                                                        ${place.lat.toFixed(4)}, ${place.lon.toFixed(4)}
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div style="border-top: 1px solid #eee; padding-top: 12px;">
+
+                                        <!-- Описание -->
+                                        ${place.description ? `
+                                        <div style="
+                                            background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+                                            padding: 10px;
+                                            border-radius: 8px;
+                                            margin-bottom: 10px;
+                                            border-left: 2px solid #e53e3e;
+                                        ">
+                                            <div style="display: flex; align-items: flex-start; gap: 8px;">
+                                                <div style="
+                                                    background: #e53e3e;
+                                                    width: 24px;
+                                                    height: 24px;
+                                                    border-radius: 6px;
+                                                    display: flex;
+                                                    align-items: center;
+                                                    justify-content: center;
+                                                    color: white;
+                                                    font-size: 11px;
+                                                    flex-shrink: 0;
+                                                    margin-top: 1px;
+                                                ">
+                                                    <i class="fas fa-info-circle"></i>
+                                                </div>
+                                                <div style="flex: 1;">
+                                                    <div style="font-weight: 700; color: #742a2a; margin-bottom: 6px; font-size: 11px;">
+                                                        ОПИСАНИЕ
+                                                    </div>
+                                                    <div style="
+                                                        color: #742a2a;
+                                                        font-size: 11px;
+                                                        line-height: 1.4;
+                                                        text-align: left;
+                                                    ">
+                                                        ${place.description}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        ` : ''}
+
+                                        <!-- Кнопки действий -->
+                                        <div style="display: flex; gap: 8px; flex-direction: column;">
+                                            ${place.website ? `
+                                            <a href="${place.website}" target="_blank"
+                                               style="
+                                                   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                                                   color: white;
+                                                   text-decoration: none;
+                                                   padding: 8px 12px;
+                                                   border-radius: 8px;
+                                                   font-weight: 700;
+                                                   text-align: center;
+                                                   display: flex;
+                                                   align-items: center;
+                                                   justify-content: center;
+                                                   gap: 6px;
+                                                   border: none;
+                                                   cursor: pointer;
+                                                   transition: all 0.3s ease;
+                                                   font-size: 11px;
+                                                   box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
+                                               "
+                                               onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(16, 185, 129, 0.4)';"
+                                               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 6px rgba(16, 185, 129, 0.3)';">
+                                                <i class="fas fa-external-link-alt" style="font-size: 10px;"></i>
+                                                Официальный сайт
+                                            </a>
+                                            ` : ''}
+
                                             <button onclick="toggleFavorite(${place.id}, this)"
-                                                    class="btn ${place.is_favorite ? 'btn-danger' : 'btn-outline-danger'} btn-sm favorite-btn"
-                                                    style="width: 100%;">
-                                                <i class="${place.is_favorite ? 'fas' : 'far'} fa-heart"></i>
+                                                    style="
+                                                        background: ${place.is_favorite ?
+                                                            'linear-gradient(135deg, #e53e3e 0%, #c53030 100%)' :
+                                                            'white'};
+                                                        color: ${place.is_favorite ? 'white' : '#e53e3e'};
+                                                        border: ${place.is_favorite ? 'none' : '2px solid #e53e3e'};
+                                                        padding: 8px 12px;
+                                                        border-radius: 8px;
+                                                        font-weight: 700;
+                                                        text-align: center;
+                                                        display: flex;
+                                                        align-items: center;
+                                                        justify-content: center;
+                                                        gap: 6px;
+                                                        cursor: pointer;
+                                                        transition: all 0.3s ease;
+                                                        font-size: 11px;
+                                                        box-shadow: ${place.is_favorite ?
+                                                            '0 2px 6px rgba(229, 62, 62, 0.3)' :
+                                                            '0 2px 6px rgba(0,0,0,0.1)'};
+                                                    "
+                                                    onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='${place.is_favorite ?
+                                                        '0 3px 8px rgba(229, 62, 62, 0.4)' :
+                                                        '0 3px 8px rgba(0,0,0,0.15)'}';"
+                                                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='${place.is_favorite ?
+                                                        '0 2px 6px rgba(229, 62, 62, 0.3)' :
+                                                        '0 2px 6px rgba(0,0,0,0.1)'}';">
+                                                <i class="${place.is_favorite ? 'fas' : 'far'} fa-heart" style="font-size: 10px;"></i>
                                                 ${place.is_favorite ? 'В избранном' : 'В избранное'}
                                             </button>
                                         </div>
                                     </div>
                                 `,
                                 hintContent: `${getTypeIcon(place.type)} ${place.title}`,
-                                balloonContentData: place // Сохраняем все данные
+                                balloonContentData: place
                             },
                             {
                                 preset: 'islands#circleIcon',
@@ -562,20 +645,27 @@
                     }
                 });
 
-                updateInfo(`✅ Готово! Загружено ${universities.length} университетов`, 'success');
+                // ДОБАВЛЯЕМ КАСТОМНЫЕ МЕТКИ (если нужны)
+                var myPlacemark1 = new ymaps.Placemark([56.060080, 160.645631], {}, {
+                    iconLayout: 'default#image',
+                    iconImageHref: 'https://gum1518.mskobr.ru/images/cms/data/1578988562.jpg',
+                    iconImageSize: [100, 100],
+                    iconImageOffset: [-50, -50]
+                });
+                map.geoObjects.add(myPlacemark1);
+
+                var myPlacemark2 = new ymaps.Placemark([4.174972, 73.509688], {}, {
+                    iconLayout: 'default#image',
+                    iconImageHref: 'https://opedagoge.ru/h/img/person/60477.jpg?i=1',
+                    iconImageSize: [100, 100],
+                    iconImageOffset: [-50, -50]
+                });
+                map.geoObjects.add(myPlacemark2);
 
                 // ОБРАБОТЧИКИ СОБЫТИЙ КАРТЫ
                 map.events.add('boundschange', function() {
                     const visibleCount = allPlacemarks.filter(pm => pm.options.get('visible')).length;
-                    updateInfo(`Показано: ${visibleCount} университетов`, 'info');
-                });
-
-                map.events.add('error', function(e) {
-                    updateInfo('❌ Ошибка карты: ' + e.get('error').message, 'error');
-                });
-
-                map.events.add('load', function() {
-                    updateInfo('🗺️ Карта полностью загружена!', 'success');
+                    updateStatus(`Показано: ${visibleCount} университетов`, 'info');
                 });
 
                 // АВТОМАТИЧЕСКОЕ ПРИМЕНЕНИЕ ФИЛЬТРОВ ПРИ ИЗМЕНЕНИИ
@@ -583,46 +673,13 @@
                 if (document.getElementById('onlyFavorites')) {
                     document.getElementById('onlyFavorites').addEventListener('change', applyFilters);
                 }
-                document.getElementById('showFavorites').addEventListener('change', function() {
-                    if (this.checked) {
-                        document.getElementById('onlyFavorites').checked = false;
-                        applyFilters();
-                    }
-                });
 
             } catch (error) {
-                updateInfo('❌ Критическая ошибка: ' + error.message, 'error');
                 console.error('Ошибка инициализации карты:', error);
             }
         }
 
-        // ПРОВЕРКА ЗАГРУЗКИ YANDEX MAPS
-        if (typeof ymaps === 'undefined') {
-            updateInfo('❌ Yandex Maps API не загружен', 'error');
-        } else {
-            updateInfo('✅ Yandex Maps API загружен', 'success');
-
-            // ЗАПУСКАЕМ ИНИЦИАЛИЗАЦИЮ КАРТЫ
-            ymaps.ready(initMap);
-        }
-
-        // ТАЙМАУТ НА СЛУЧАЙ ЕСЛИ КАРТА НЕ ГРУЗИТСЯ
-        setTimeout(() => {
-            const infoText = document.getElementById('infoContent').textContent;
-            if (infoText.includes('Загружаем карту') || infoText.includes('Yandex Maps API не загружен')) {
-                updateInfo('❌ Таймаут загрузки. Проверьте подключение к интернету', 'error');
-            }
-        }, 10000);
-
-        // СКРЫВАЕМ ИНФО ПАНЕЛЬ ПРИ КЛИКЕ НА КАРТУ
-        document.getElementById('map').addEventListener('click', function() {
-            const infoPanel = document.getElementById('infoPanel');
-            infoPanel.style.opacity = '0.7';
-
-            setTimeout(() => {
-                infoPanel.style.opacity = '1';
-            }, 3000);
-        });
+        ymaps.ready(initMap);
 
         // ОБРАБОТКА КЛАВИШ
         document.addEventListener('keydown', function(e) {
