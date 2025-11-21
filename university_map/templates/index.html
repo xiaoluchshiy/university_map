@@ -320,34 +320,205 @@
             return colors[type] || '#667eea';
         }
 
-        // ФУНКЦИЯ ПЕРЕКЛЮЧЕНИЯ ИЗБРАННОГО (С МГНОВЕННЫМ ИЗМЕНЕНИЕМ)
+        // ФУНКЦИЯ ДЛЯ ОБНОВЛЕНИЯ СОДЕРЖИМОГО БАЛУНА
+        function createBalloonContent(place) {
+            return `
+                <div style="
+                    padding: 12px;
+                    width: 350px;
+                    background: #f8f9fa;
+                    border-radius: 0 0 10px 10px;
+                    max-height: 1000px;
+                    overflow-y: auto;
+                ">
+                    <!-- Информационная карточка -->
+                    <div style="
+                        background: white;
+                        padding: 10px;
+                        border-radius: 8px;
+                        margin-bottom: 10px;
+                        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+                        border: 1px solid #e9ecef;
+                    ">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                            <div style="
+                                background: #667eea;
+                                width: 24px;
+                                height: 24px;
+                                border-radius: 6px;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                color: white;
+                                font-size: 11px;
+                            ">
+                                <i class="fas fa-tag"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight: 600; color: #495057; font-size: 10px;">ТИП</div>
+                                <div style="color: #667eea; font-weight: 700; font-size: 11px;">${getTypeName(place.type)}</div>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div style="
+                                background: #10b981;
+                                width: 24px;
+                                height: 24px;
+                                border-radius: 6px;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                color: white;
+                                font-size: 11px;
+                            ">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight: 600; color: #495057; font-size: 10px;">КООРДИНАТЫ</div>
+                                <div style="color: #10b981; font-weight: 700; font-size: 10px;">
+                                    ${place.lat.toFixed(4)}, ${place.lon.toFixed(4)}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Описание -->
+                    ${place.description ? `
+                    <div style="
+                        background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+                        padding: 10px;
+                        border-radius: 8px;
+                        margin-bottom: 10px;
+                        border-left: 2px solid #e53e3e;
+                    ">
+                        <div style="display: flex; align-items: flex-start; gap: 8px;">
+                            <div style="
+                                background: #e53e3e;
+                                width: 24px;
+                                height: 24px;
+                                border-radius: 6px;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                color: white;
+                                font-size: 11px;
+                                flex-shrink: 0;
+                                margin-top: 1px;
+                            ">
+                                <i class="fas fa-info-circle"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 700; color: #742a2a; margin-bottom: 6px; font-size: 11px;">
+                                    ОПИСАНИЕ
+                                </div>
+                                <div style="
+                                    color: #742a2a;
+                                    font-size: 11px;
+                                    line-height: 1.4;
+                                    text-align: left;
+                                ">
+                                    ${place.description}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    <!-- Кнопки действий -->
+                    <div style="display: flex; gap: 8px; flex-direction: column;">
+                        ${place.website ? `
+                        <a href="${place.website}" target="_blank"
+                           style="
+                               background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                               color: white;
+                               text-decoration: none;
+                               padding: 8px 12px;
+                               border-radius: 8px;
+                               font-weight: 700;
+                               text-align: center;
+                               display: flex;
+                               align-items: center;
+                               justify-content: center;
+                               gap: 6px;
+                               border: none;
+                               cursor: pointer;
+                               transition: all 0.3s ease;
+                               font-size: 11px;
+                               box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
+                           "
+                           onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(16, 185, 129, 0.4)';"
+                           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 6px rgba(16, 185, 129, 0.3)';">
+                            <i class="fas fa-external-link-alt" style="font-size: 10px;"></i>
+                            Официальный сайт
+                        </a>
+                        ` : ''}
+
+                        <button onclick="toggleFavorite(${place.id}, this)"
+                                style="
+                                    background: ${place.is_favorite ?
+                                        'linear-gradient(135deg, #e53e3e 0%, #c53030 100%)' :
+                                        'white'};
+                                    color: ${place.is_favorite ? 'white' : '#e53e3e'};
+                                    border: ${place.is_favorite ? 'none' : '2px solid #e53e3e'};
+                                    padding: 8px 12px;
+                                    border-radius: 8px;
+                                    font-weight: 700;
+                                    text-align: center;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    gap: 6px;
+                                    cursor: pointer;
+                                    transition: all 0.3s ease;
+                                    font-size: 11px;
+                                    box-shadow: ${place.is_favorite ?
+                                        '0 2px 6px rgba(229, 62, 62, 0.3)' :
+                                        '0 2px 6px rgba(0,0,0,0.1)'};
+                                "
+                                onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='${place.is_favorite ?
+                                    '0 3px 8px rgba(229, 62, 62, 0.4)' :
+                                    '0 3px 8px rgba(0,0,0,0.15)'}';"
+                                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='${place.is_favorite ?
+                                    '0 2px 6px rgba(229, 62, 62, 0.3)' :
+                                    '0 2px 6px rgba(0,0,0,0.1)'}';">
+                            <i class="${place.is_favorite ? 'fas' : 'far'} fa-heart" style="font-size: 10px;"></i>
+                            ${place.is_favorite ? 'В избранном' : 'В избранное'}
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ФУНКЦИЯ ПЕРЕКЛЮЧЕНИЯ ИЗБРАННОГО
         function toggleFavorite(universityId, button) {
             if (!isAuthenticated) {
                 return;
             }
 
-            // Сохраняем исходное состояние для отката при ошибке
-            const originalHTML = button.innerHTML;
-            const originalBackground = button.style.background;
-            const originalColor = button.style.color;
-            const originalBorder = button.style.border;
-            const originalBoxShadow = button.style.boxShadow;
+            // Получаем текущее состояние из данных placemark
+            const placemark = allPlacemarks.find(pm =>
+                pm.properties.get('balloonContentData').id === universityId
+            );
 
-            // Мгновенно меняем внешний вид кнопки
-            if (button.innerHTML.includes('far fa-heart')) {
-                // Меняем на "в избранном" - красный
-                button.innerHTML = '<i class="fas fa-heart"></i> В избранном';
-                button.style.background = 'linear-gradient(135deg, #e53e3e 0%, #c53030 100%)';
-                button.style.color = 'white';
-                button.style.border = 'none';
-                button.style.boxShadow = '0 3px 8px rgba(229, 62, 62, 0.3)';
-            } else {
-                // Меняем на "в избранное" - белый с красной рамкой
+            if (!placemark) return;
+
+            const universityData = placemark.properties.get('balloonContentData');
+            const currentIsFavorite = universityData.is_favorite;
+
+            // Мгновенно меняем внешний вид кнопки на противоположное состояние
+            if (currentIsFavorite) {
                 button.innerHTML = '<i class="far fa-heart"></i> В избранное';
                 button.style.background = 'white';
                 button.style.color = '#e53e3e';
                 button.style.border = '2px solid #e53e3e';
-                button.style.boxShadow = '0 3px 8px rgba(0,0,0,0.1)';
+                button.style.boxShadow = '0 2px 6px rgba(0,0,0,0.1)';
+            } else {
+                button.innerHTML = '<i class="fas fa-heart"></i> В избранном';
+                button.style.background = 'linear-gradient(135deg, #e53e3e 0%, #c53030 100%)';
+                button.style.color = 'white';
+                button.style.border = 'none';
+                button.style.boxShadow = '0 2px 6px rgba(229, 62, 62, 0.3)';
             }
 
             // Отправляем запрос на сервер
@@ -361,13 +532,10 @@
             .then(data => {
                 if (data.success) {
                     // Обновляем данные в placemark
-                    const placemark = allPlacemarks.find(pm =>
-                        pm.properties.get('balloonContentData').id === universityId
-                    );
-                    if (placemark) {
-                        const universityData = placemark.properties.get('balloonContentData');
-                        universityData.is_favorite = data.action === 'added';
-                    }
+                    universityData.is_favorite = data.action === 'added';
+
+                    // Обновляем содержимое балуна для сохранения состояния
+                    placemark.properties.set('balloonContentBody', createBalloonContent(universityData));
 
                     // Обновляем фильтр если включен режим "Только избранные"
                     if (showOnlyFavorites) {
@@ -375,21 +543,37 @@
                     }
                 } else {
                     // Если ошибка, возвращаем кнопку в исходное состояние
-                    button.innerHTML = originalHTML;
-                    button.style.background = originalBackground;
-                    button.style.color = originalColor;
-                    button.style.border = originalBorder;
-                    button.style.boxShadow = originalBoxShadow;
+                    if (currentIsFavorite) {
+                        button.innerHTML = '<i class="fas fa-heart"></i> В избранном';
+                        button.style.background = 'linear-gradient(135deg, #e53e3e 0%, #c53030 100%)';
+                        button.style.color = 'white';
+                        button.style.border = 'none';
+                        button.style.boxShadow = '0 2px 6px rgba(229, 62, 62, 0.3)';
+                    } else {
+                        button.innerHTML = '<i class="far fa-heart"></i> В избранное';
+                        button.style.background = 'white';
+                        button.style.color = '#e53e3e';
+                        button.style.border = '2px solid #e53e3e';
+                        button.style.boxShadow = '0 2px 6px rgba(0,0,0,0.1)';
+                    }
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
                 // В случае ошибки возвращаем кнопку в исходное состояние
-                button.innerHTML = originalHTML;
-                button.style.background = originalBackground;
-                button.style.color = originalColor;
-                button.style.border = originalBorder;
-                button.style.boxShadow = originalBoxShadow;
+                if (currentIsFavorite) {
+                    button.innerHTML = '<i class="fas fa-heart"></i> В избранном';
+                    button.style.background = 'linear-gradient(135deg, #e53e3e 0%, #c53030 100%)';
+                    button.style.color = 'white';
+                    button.style.border = 'none';
+                    button.style.boxShadow = '0 2px 6px rgba(229, 62, 62, 0.3)';
+                } else {
+                    button.innerHTML = '<i class="far fa-heart"></i> В избранное';
+                    button.style.background = 'white';
+                    button.style.color = '#e53e3e';
+                    button.style.border = '2px solid #e53e3e';
+                    button.style.boxShadow = '0 2px 6px rgba(0,0,0,0.1)';
+                }
             });
         }
 
@@ -460,172 +644,7 @@
                                         </div>
                                     </div>
                                 `,
-                                balloonContentBody: `
-                                    <div style="
-                                        padding: 12px;
-                                        width: 280px;
-                                        background: #f8f9fa;
-                                        border-radius: 0 0 10px 10px;
-                                        max-height: 350px;
-                                        overflow-y: auto;
-                                    ">
-                                        <!-- Информационная карточка -->
-                                        <div style="
-                                            background: white;
-                                            padding: 10px;
-                                            border-radius: 8px;
-                                            margin-bottom: 10px;
-                                            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-                                            border: 1px solid #e9ecef;
-                                        ">
-                                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                                                <div style="
-                                                    background: #667eea;
-                                                    width: 24px;
-                                                    height: 24px;
-                                                    border-radius: 6px;
-                                                    display: flex;
-                                                    align-items: center;
-                                                    justify-content: center;
-                                                    color: white;
-                                                    font-size: 11px;
-                                                ">
-                                                    <i class="fas fa-tag"></i>
-                                                </div>
-                                                <div>
-                                                    <div style="font-weight: 600; color: #495057; font-size: 10px;">ТИП</div>
-                                                    <div style="color: #667eea; font-weight: 700; font-size: 11px;">${getTypeName(place.type)}</div>
-                                                </div>
-                                            </div>
-
-                                            <div style="display: flex; align-items: center; gap: 8px;">
-                                                <div style="
-                                                    background: #10b981;
-                                                    width: 24px;
-                                                    height: 24px;
-                                                    border-radius: 6px;
-                                                    display: flex;
-                                                    align-items: center;
-                                                    justify-content: center;
-                                                    color: white;
-                                                    font-size: 11px;
-                                                ">
-                                                    <i class="fas fa-map-marker-alt"></i>
-                                                </div>
-                                                <div>
-                                                    <div style="font-weight: 600; color: #495057; font-size: 10px;">КООРДИНАТЫ</div>
-                                                    <div style="color: #10b981; font-weight: 700; font-size: 10px;">
-                                                        ${place.lat.toFixed(4)}, ${place.lon.toFixed(4)}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Описание -->
-                                        ${place.description ? `
-                                        <div style="
-                                            background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
-                                            padding: 10px;
-                                            border-radius: 8px;
-                                            margin-bottom: 10px;
-                                            border-left: 2px solid #e53e3e;
-                                        ">
-                                            <div style="display: flex; align-items: flex-start; gap: 8px;">
-                                                <div style="
-                                                    background: #e53e3e;
-                                                    width: 24px;
-                                                    height: 24px;
-                                                    border-radius: 6px;
-                                                    display: flex;
-                                                    align-items: center;
-                                                    justify-content: center;
-                                                    color: white;
-                                                    font-size: 11px;
-                                                    flex-shrink: 0;
-                                                    margin-top: 1px;
-                                                ">
-                                                    <i class="fas fa-info-circle"></i>
-                                                </div>
-                                                <div style="flex: 1;">
-                                                    <div style="font-weight: 700; color: #742a2a; margin-bottom: 6px; font-size: 11px;">
-                                                        ОПИСАНИЕ
-                                                    </div>
-                                                    <div style="
-                                                        color: #742a2a;
-                                                        font-size: 11px;
-                                                        line-height: 1.4;
-                                                        text-align: left;
-                                                    ">
-                                                        ${place.description}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        ` : ''}
-
-                                        <!-- Кнопки действий -->
-                                        <div style="display: flex; gap: 8px; flex-direction: column;">
-                                            ${place.website ? `
-                                            <a href="${place.website}" target="_blank"
-                                               style="
-                                                   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-                                                   color: white;
-                                                   text-decoration: none;
-                                                   padding: 8px 12px;
-                                                   border-radius: 8px;
-                                                   font-weight: 700;
-                                                   text-align: center;
-                                                   display: flex;
-                                                   align-items: center;
-                                                   justify-content: center;
-                                                   gap: 6px;
-                                                   border: none;
-                                                   cursor: pointer;
-                                                   transition: all 0.3s ease;
-                                                   font-size: 11px;
-                                                   box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
-                                               "
-                                               onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(16, 185, 129, 0.4)';"
-                                               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 6px rgba(16, 185, 129, 0.3)';">
-                                                <i class="fas fa-external-link-alt" style="font-size: 10px;"></i>
-                                                Официальный сайт
-                                            </a>
-                                            ` : ''}
-
-                                            <button onclick="toggleFavorite(${place.id}, this)"
-                                                    style="
-                                                        background: ${place.is_favorite ?
-                                                            'linear-gradient(135deg, #e53e3e 0%, #c53030 100%)' :
-                                                            'white'};
-                                                        color: ${place.is_favorite ? 'white' : '#e53e3e'};
-                                                        border: ${place.is_favorite ? 'none' : '2px solid #e53e3e'};
-                                                        padding: 8px 12px;
-                                                        border-radius: 8px;
-                                                        font-weight: 700;
-                                                        text-align: center;
-                                                        display: flex;
-                                                        align-items: center;
-                                                        justify-content: center;
-                                                        gap: 6px;
-                                                        cursor: pointer;
-                                                        transition: all 0.3s ease;
-                                                        font-size: 11px;
-                                                        box-shadow: ${place.is_favorite ?
-                                                            '0 2px 6px rgba(229, 62, 62, 0.3)' :
-                                                            '0 2px 6px rgba(0,0,0,0.1)'};
-                                                    "
-                                                    onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='${place.is_favorite ?
-                                                        '0 3px 8px rgba(229, 62, 62, 0.4)' :
-                                                        '0 3px 8px rgba(0,0,0,0.15)'}';"
-                                                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='${place.is_favorite ?
-                                                        '0 2px 6px rgba(229, 62, 62, 0.3)' :
-                                                        '0 2px 6px rgba(0,0,0,0.1)'}';">
-                                                <i class="${place.is_favorite ? 'fas' : 'far'} fa-heart" style="font-size: 10px;"></i>
-                                                ${place.is_favorite ? 'В избранном' : 'В избранное'}
-                                            </button>
-                                        </div>
-                                    </div>
-                                `,
+                                balloonContentBody: createBalloonContent(place),
                                 hintContent: `${getTypeIcon(place.type)} ${place.title}`,
                                 balloonContentData: place
                             },
@@ -635,6 +654,12 @@
                                 iconCaptionMaxWidth: '200'
                             }
                         );
+
+                        // ОБРАБОТЧИК ОТКРЫТИЯ БАЛУНА - обновляем содержимое при каждом открытии
+                        placemark.events.add('balloonopen', function() {
+                            const universityData = this.properties.get('balloonContentData');
+                            this.properties.set('balloonContentBody', createBalloonContent(universityData));
+                        });
 
                         // ДОБАВЛЯЕМ МЕТКУ НА КАРТУ
                         map.geoObjects.add(placemark);
