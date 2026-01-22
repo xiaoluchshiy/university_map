@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация - UniMap</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+        
+        .register-container {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+        }
+        
+        .left-section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: white;
+            position: relative;
+        }
+        
+        .home-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 10px;
+            padding: 10px 15px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .home-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            text-decoration: none;
+            transform: translateY(-2px);
+        }
+        
+        .hero-content {
+            max-width: 500px;
+        }
+        
+        .logo {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+        
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+        
+        .benefits {
+            margin-top: 2rem;
+        }
+        
+        .benefit-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+        
+        .benefit-icon {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .right-section {
+            width: 450px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .form-container {
+            width: 100%;
+        }
+        
+        .form-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #2c5aa0;
+        }
+        
+        .form-subtitle {
+            color: #6c757d;
+            margin-bottom: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 12px 15px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn-register {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+            width: 100%;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+        
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .divider {
+            text-align: center;
+            margin: 2rem 0;
+            color: #6c757d;
+            position: relative;
+        }
+        
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e9ecef;
+        }
+        
+        .divider span {
+            background: white;
+            padding: 0 15px;
+            position: relative;
+        }
+        
+        .login-link {
+            text-align: center;
+            margin-top: 1rem;
+        }
+        
+        .login-link a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .alert {
+            border-radius: 10px;
+            border: none;
+            padding: 15px;
+            margin-bottom: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .register-container {
+                flex-direction: column;
+            }
+            
+            .right-section {
+                width: 100%;
+            }
+            
+            .left-section {
+                padding: 20px;
+            }
+            
+            .home-btn {
+                top: 10px;
+                left: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <!-- Левая секция - информация -->
+        <div class="left-section">
+            <!-- Кнопка "На главную" -->
+            <a href="/" class="home-btn">
+                <i class="fas fa-arrow-left"></i> На главную
+            </a>
+            
+            <div class="hero-content">
+                <div class="logo">
+                    <i class="fas fa-graduation-cap"></i> UniMap
+                </div>
+                <h1 class="hero-title">
+                    Создайте своё будущее
+                </h1>
+                <p class="hero-subtitle">
+                    Присоединяйтесь к сообществу абитуриентов и студентов Москвы. 
+                    Найдите университет мечты и начните свой путь к успешной карьере.
+                </p>
+                
+                <div class="benefits">
+                    <div class="benefit-item">
+                        <span class="benefit-icon">🎯</span>
+                        Персональные рекомендации
+                    </div>
+                    <div class="benefit-item">
+                        <span class="benefit-icon">💾</span>
+                        Сохранение избранных вузов
+                    </div>
+                    <div class="benefit-item">
+                        <span class="benefit-icon">📅</span>
+                        Напоминания о дедлайнах
+                    </div>
+                    <div class="benefit-item">
+                        <span class="benefit-icon">📊</span>
+                        Сравнение программ обучения
+                    </div>
+                    <div class="benefit-item">
+                        <span class="benefit-icon">🔔</span>
+                        Уведомления о днях открытых дверей
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Правая секция - форма -->
+        <div class="right-section">
+            <div class="form-container">
+                <h2 class="form-title">Создать аккаунт</h2>
+                <p class="form-subtitle">Зарегистрируйтесь чтобы начать поиск</p>
+                
+                <form action="" method="post">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="form-group">
+                        <label class="form-label">Имя пользователя</label>
+                        {{ form.name(class="form-control", placeholder="Ваше имя") }}
+                        {% for error in form.name.errors %}
+                            <div class="alert alert-danger mt-2">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Email адрес</label>
+                        {{ form.email(class="form-control", placeholder="your@email.com") }}
+                        {% for error in form.email.errors %}
+                            <div class="alert alert-danger mt-2">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Пароль</label>
+                        {{ form.password(class="form-control", type="password", placeholder="Создайте пароль") }}
+                        {% for error in form.password.errors %}
+                            <div class="alert alert-danger mt-2">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Повторите пароль</label>
+                        {{ form.password_again(class="form-control", type="password", placeholder="Повторите пароль") }}
+                        {% for error in form.password_again.errors %}
+                            <div class="alert alert-danger mt-2">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">О себе (необязательно)</label>
+                        {{ form.about(class="form-control", placeholder="Расскажите о своих интересах...", rows="3") }}
+                    </div>
+                    
+                    {{ form.submit(class="btn-register", type="submit") }}
+                    
+                    {% if message %}
+                        <div class="alert alert-danger">
+                            {{ message }}
+                        </div>
+                    {% endif %}
+                </form>
+                
+                <div class="divider">
+                    <span>Уже есть аккаунт?</span>
+                </div>
+                
+                <div class="login-link">
+                    <a href="/login">Войти в существующий аккаунт</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

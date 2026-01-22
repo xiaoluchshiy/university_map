@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Избранные университеты - UniMap</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #667eea;
+            --secondary: #764ba2;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fa;
+            color: #333;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .favorites-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2c5aa0;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .favorite-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border-left: 4px solid var(--primary);
+            transition: transform 0.3s ease;
+        }
+
+        .favorite-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .university-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #2c5aa0;
+            margin-bottom: 0.5rem;
+        }
+
+        .university-type {
+            color: #6c757d;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .university-coords {
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: #dee2e6;
+        }
+
+        .btn-back {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-back:hover {
+            background: #5a6fd8;
+            color: white;
+            text-decoration: none;
+            transform: translateY(-2px);
+        }
+
+        .favorite-count {
+            background: var(--primary);
+            color: white;
+            border-radius: 20px;
+            padding: 5px 15px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .type-icon {
+            font-size: 1.2em;
+            margin-right: 8px;
+        }
+
+        .university-type-badge {
+            background: #667eea;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Обновленные стили для кнопок */
+        .btn-modern {
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-show-map {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-show-map:hover {
+            background: linear-gradient(135deg, #5a6fd8, #6a4190);
+            color: white;
+        }
+
+        .btn-remove {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+        }
+
+        .btn-remove:hover {
+            background: linear-gradient(135deg, #ff5252, #e53935);
+            color: white;
+        }
+
+        .buttons-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Навигация -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand logo" href="/">
+                <i class="fas fa-graduation-cap"></i> UniMap
+            </a>
+            <div class="navbar-nav ml-auto">
+                <a class="nav-link text-white" href="/map">
+                    <i class="fas fa-map-marked-alt"></i> Карта
+                </a>
+                <a class="nav-link text-white" href="/profile">
+                    <i class="fas fa-user"></i> Личный кабинет
+                </a>
+                <a class="nav-link text-white" href="/logout">
+                    <i class="fas fa-sign-out-alt"></i> Выйти
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="favorites-container">
+        <h1 class="page-title">
+            <i class="fas fa-heart" style="color: #e74c3c;"></i>
+            Избранные университеты
+            {% if favorites %}
+            <span class="favorite-count">{{ favorites|length }}</span>
+            {% endif %}
+        </h1>
+
+        <div class="mb-4">
+            <a href="/map" class="btn-back">
+                <i class="fas fa-arrow-left"></i>
+                Назад к карте
+            </a>
+        </div>
+
+        {% if favorites %}
+            <div class="row">
+                {% for uni in favorites %}
+                <div class="col-lg-6">
+                    <div class="favorite-card" data-type="{{ uni.type }}">
+                        <div class="university-name">
+                            <span class="type-icon" id="icon-{{ uni.id }}">🎓</span>{{ uni.title }}
+                        </div>
+                        <div class="university-type">
+                            <strong>Тип:</strong> <span class="university-type-badge" id="type-{{ uni.id }}">{{ uni.type }}</span>
+                        </div>
+                        <div class="university-coords">
+                            <strong>Координаты:</strong> {{ "%.4f, %.4f"|format(uni.lat, uni.lon) }}
+                        </div>
+                        <div class="buttons-container">
+                            <a href="/map" class="btn-modern btn-show-map">
+                                <i class="fas fa-map-marker-alt"></i> Показать на карте
+                            </a>
+                            <button class="btn-modern btn-remove remove-favorite" data-id="{{ uni.id }}">
+                                <i class="fas fa-trash"></i> Удалить
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-heart-broken"></i>
+                <h3>Пока нет избранных университетов</h3>
+                <p>Добавьте университеты в избранное на карте, чтобы они отображались здесь</p>
+                <a href="/map" class="btn btn-primary">
+                    <i class="fas fa-map-marked-alt"></i> Перейти к карте
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Функции для отображения иконок и названий типов
+        function getTypeIcon(type) {
+            const icons = {
+                'federal': '🏛️', 'technical': '🔧', 'medical': '⚕️', 'pedagogical': '👨‍🏫',
+                'humanitarian': '📚', 'economic': '💼', 'architecture': '🏗️', 'linguistic': '🔤',
+                'social': '👥', 'veterinary': '🐾', 'food_tech': '🍕', 'technology': '⚙️',
+                'art': '🎨', 'culture': '🎭'
+            };
+            return icons[type] || '🎓';
+        }
+
+        function getTypeName(type) {
+            const types = {
+                'federal': 'Федеральный университет', 'technical': 'Технический вуз',
+                'medical': 'Медицинский университет', 'pedagogical': 'Педагогический университет',
+                'humanitarian': 'Гуманитарный университет', 'economic': 'Экономический университет',
+                'architecture': 'Архитектурный институт', 'linguistic': 'Лингвистический университет',
+                'social': 'Социальный университет', 'veterinary': 'Ветеринарная академия',
+                'food_tech': 'Пищевой университет', 'technology': 'Технологический университет',
+                'art': 'Художественная академия', 'culture': 'Институт культуры'
+            };
+            return types[type] || 'Университет';
+        }
+
+        // Обновляем иконки и названия типов после загрузки страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            // Обновляем все карточки университетов
+            document.querySelectorAll('.favorite-card').forEach(card => {
+                const type = card.getAttribute('data-type');
+                const cardId = card.querySelector('.remove-favorite').getAttribute('data-id');
+
+                // Обновляем иконку
+                const iconElement = document.getElementById('icon-' + cardId);
+                if (iconElement) {
+                    iconElement.textContent = getTypeIcon(type);
+                }
+
+                // Обновляем название типа
+                const typeElement = document.getElementById('type-' + cardId);
+                if (typeElement) {
+                    typeElement.textContent = getTypeName(type);
+                }
+            });
+        });
+
+        // Обработчик удаления из избранного
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.remove-favorite').forEach(button => {
+                button.addEventListener('click', function() {
+                    const universityId = this.getAttribute('data-id');
+                    const card = this.closest('.favorite-card');
+
+                    fetch('/toggle_favorite/' + universityId, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            card.style.opacity = '0.5';
+                            setTimeout(() => {
+                                card.remove();
+                                // Перезагружаем страницу для обновления счетчика
+                                location.reload();
+                            }, 300);
+                        } else {
+                            alert('Ошибка: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Произошла ошибка');
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
