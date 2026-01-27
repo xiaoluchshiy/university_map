@@ -42,7 +42,6 @@ db_session.global_init("db/university.db")
 
 @app.route("/")
 def landing():
-    """Главная страница-лендинг"""
     return render_template("landing.html")
 
 
@@ -50,19 +49,16 @@ def landing():
 def index():
     db_sess = db_session.create_session()
 
-    # --- получаем фильтры ---
-    uni_type = request.args.get("type")        # federal / technical / medical и т.д.
-    only_favorites = request.args.get("fav")   # "1" или None
+    uni_type = request.args.get("type")
+    only_favorites = request.args.get("fav")
 
     query = db_sess.query(University)
 
-    # --- фильтр по типу ---
     if uni_type and uni_type != "all":
         query = query.filter(University.type == uni_type)
 
     universities = query.all()
 
-    # --- избранные ---
     favorite_ids = []
     if current_user.is_authenticated:
         user = db_sess.get(User, current_user.id)
@@ -122,8 +118,6 @@ def toggle_favorite(university_id):
 @app.route('/favorites')
 @login_required
 def favorites():
-    """Страница избранных университетов"""
-
     db_sess = db_session.create_session()
     user = db_sess.get(User, current_user.id)
 
@@ -145,7 +139,6 @@ def favorites():
                 'website': uni.website,
                 'description': uni.description,
                 'is_favorite': True,
-                # ✅ Добавляем иконку и красивое название для шаблона
                 'type_icon': TYPE_ICONS.get(uni.type, '🎓'),
                 'type_name': TYPE_NAMES.get(uni.type, 'Университет')
             })
@@ -156,8 +149,6 @@ def favorites():
 @app.route('/profile')
 @login_required
 def profile():
-    """Личный кабинет пользователя"""
-
     db_sess = db_session.create_session()
     user = db_sess.get(User, current_user.id)
 
@@ -170,9 +161,6 @@ def profile():
     )
 
 
-# =======================
-# АВТОРИЗАЦИЯ (БЕЗ ИЗМЕНЕНИЙ)
-# =======================
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegisterForm()
