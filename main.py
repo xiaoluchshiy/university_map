@@ -1,9 +1,12 @@
-from flask import Flask, render_template, redirect, request
+from flask import Flask, render_template, redirect, request, Response, abort
 from data import db_session
 from data.university import University
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from data.users import User
 from forms.user import RegisterForm, LoginForm
+import io
+import csv
+import os
 
 
 TYPE_ICONS = {
@@ -42,7 +45,7 @@ db_session.global_init("db/university.db")
 
 @app.route("/")
 def landing():
-    return render_template("landing.html")
+    return render_template("landing.html", current_user=current_user)
 
 
 @app.route("/map")
@@ -146,13 +149,35 @@ def favorites():
     return render_template("favorites.html", favorites=favorite_universities)
 
 
-@app.route('/profile')
+@app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
     db_sess = db_session.create_session()
     user = db_sess.get(User, current_user.id)
 
     favorite_count = len(user.favorite_universities)
+
+    if request.method == "POST":
+        file = request.files.get("file")
+        if not file or file.filename == "":
+            abort(400, "Файл не выбран")
+        file.filename = "universities.csv"
+        os.makedirs(f"universities", exist_ok=True)
+        file.save(os.path.join(f"universities", file.filename))
+        with open('universities/universities.csv', 'r', encoding='utf-8') as f:
+            reader = csv.reader(f, delimiter=',')
+            h = next(reader)
+            for row in reader:
+                universities = University(
+                    title=row[1],
+                    content=row[2],
+                    type=row[3],
+                    website=row[4],
+                    description=row[5]
+                )
+                db_sess.add(universities)
+                db_sess.commit()
+        return redirect('/profile')
 
     return render_template(
         "profile.html",
@@ -216,6 +241,31 @@ def login():
 
     return render_template('login.html', form=form)
 
+
+@app.route("/export")
+@login_required
+def export():
+    output = io.StringIO()
+    writer = csv.writer(output)
+
+    writer.writerow(['ID', 'TITLE', 'CONTENT', 'TYPE', 'WEBSITE', 'DESCRIPTION'])
+
+    db_sess = db_session.create_session()
+    universities = db_sess.query(University).all()
+
+    for university in universities:
+        writer.writerow([
+            university.id,
+            university.title,
+            university.content,
+            university.type,
+            university.website,
+            university.description
+        ])
+
+    output.seek(0)
+
+    return Response(output, mimetype='text/csv', headers={'Content-Disposition': 'attachment;filename=universities.csv'})
 
 @app.route('/logout')
 @login_required
