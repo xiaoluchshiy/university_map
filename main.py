@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, request, Response, abort, send_file
+from flask import Flask, render_template, redirect, request, Response, abort
 from data import db_session
 from data.university import University
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
@@ -327,11 +327,6 @@ def export():
 def logout():
     logout_user()
     return redirect("/")
-
-
-@app.route('/download-db')
-def download_db():
-    return send_file('db/university.db', as_attachment=True)
 
 
 if __name__ == '__main__':
