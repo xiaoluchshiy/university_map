@@ -27,8 +27,9 @@ class User(SqlAlchemyBase, UserMixin):
     hashed_password = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     created_date = sqlalchemy.Column(sqlalchemy.DateTime,
                                      default=datetime.datetime.now)
+    admin = sqlalchemy.Column(sqlalchemy.Boolean, nullable=True)
+    ban = sqlalchemy.Column(sqlalchemy.Boolean, nullable=True)
 
-    # Связь с избранными университетами
     favorite_universities = orm.relationship(
         'University',
         secondary=favorite_association,

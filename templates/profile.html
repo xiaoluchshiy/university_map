@@ -16,6 +16,11 @@
                 <i class="fas fa-graduation-cap"></i> UniMap
             </a>
             <div class="navbar-nav ml-auto">
+                {% if user.admin %}
+                <a class="nav-link text-white" href="/admin/users">
+                    <i class="fas fa-users"></i> Таблица пользователей
+                </a>
+                {% endif %}
                 <a class="nav-link text-white" href="/map">
                     <i class="fas fa-map-marked-alt"></i> Карта
                 </a>
@@ -70,7 +75,8 @@
             </div>
         </div>
     </div>
-    <div class="profile-container">
+    {% if user.admin %}
+    <div class="profile-container profile-admin">
         <div class="task-import">
             <p>Импорт задач</p>
             <form class="send" method="post" enctype="multipart/form-data" id="uploadForm">
@@ -82,7 +88,7 @@
             <i class="fas fa-download"></i> Экспорт
         </a>
     </div>
+    {% endif %}
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </body>
 </html>

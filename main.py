@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, request, Response, abort
+from flask import Flask, render_template, redirect, request, Response, abort, send_file
 from data import db_session
 from data.university import University
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
@@ -7,6 +7,7 @@ from forms.user import RegisterForm, LoginForm
 import io
 import csv
 import os
+from functools import wraps
 
 
 TYPE_ICONS = {
@@ -41,6 +42,36 @@ def load_user(user_id):
 
 
 db_session.global_init("db/university.db")
+
+
+@app.errorhandler(403)
+def forbidden(e):
+    return render_template("403.html"), 403
+
+
+@app.errorhandler(401)
+def unauthorized(e):
+    return render_template("401.html"), 401
+    
+
+def admin_required(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if not current_user.admin:
+            abort(403)
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+def user_ban(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if current_user.ban:
+            abort(403)
+        return func(*args, **kwargs)
+
+    return wrapper
 
 
 @app.route("/")
@@ -186,6 +217,30 @@ def profile():
     )
 
 
+@app.route('/admin/users', methods=["GET", "POST"])
+@login_required
+@admin_required
+@user_ban
+def admin_users():
+    db_sess = db_session.create_session()
+    users = db_sess.query(User)
+    if request.method == "POST":
+        for user in users:
+            admin_value = request.form.get(f"admin_{user.id}")
+            ban_value = request.form.get(f"ban_{user.id}")
+            if admin_value == "admin":
+                user.admin = 1
+            if admin_value == "user":
+                user.admin = 0
+            if ban_value == "banned":
+                user.ban = 1
+            if ban_value == "unbanned":
+                user.ban = 0
+        db_sess.commit()
+        return redirect('/admin/users')
+    return render_template("admin_users.html", users=users)
+
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegisterForm()
@@ -272,6 +327,11 @@ def export():
 def logout():
     logout_user()
     return redirect("/")
+
+
+@app.route('/download-db')
+def download_db():
+    return send_file('db/university.db', as_attachment=True)
 
 
 if __name__ == '__main__':
