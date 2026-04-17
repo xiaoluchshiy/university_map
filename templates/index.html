@@ -15,20 +15,21 @@
 <body>
     <!-- ПАНЕЛЬ УПРАВЛЕНИЯ -->
     <div class="control-panel">
-        <a href="/" class="control-btn"><i class="fas fa-home"></i> Главная</a>
-
-        {% if current_user.is_authenticated %}
-        <div class="user-menu">
-            <div class="user-info"><i class="fas fa-user"></i> {{ current_user.name }}</div>
-            <a href="/profile" class="control-btn" style="background: rgba(102,126,234,0.1);"><i class="fas fa-user-circle"></i> Кабинет</a>
-            <a href="/favorites" class="control-btn" style="background: rgba(231,76,60,0.1);"><i class="fas fa-heart"></i> Избранное</a>
-            <a href="/logout" class="control-btn" style="background: rgba(108,117,125,0.1);"><i class="fas fa-sign-out-alt"></i> Выйти</a>
-        </div>
-        {% else %}
+        {% if not current_user.is_authenticated %}
         <a href="/login" class="control-btn"><i class="fas fa-sign-in-alt"></i> Войти</a>
         <a href="/register" class="control-btn"><i class="fas fa-user-plus"></i> Регистрация</a>
         {% endif %}
     </div>
+
+    {% if current_user.is_authenticated %}
+    <!-- МЕНЮ ПОЛЬЗОВАТЕЛЯ -->
+    <div class="user-menu">
+        <div class="user-info"><i class="fas fa-user"></i> {{ current_user.name }}</div>
+        <a href="/profile" class="control-btn" style="background: rgba(102,126,234,0.1);"><i class="fas fa-user-circle"></i> Кабинет</a>
+        <a href="/favorites" class="control-btn" style="background: rgba(231,76,60,0.1);"><i class="fas fa-heart"></i> Избранное</a>
+        <a href="/logout" class="control-btn" style="background: rgba(108,117,125,0.1);"><i class="fas fa-sign-out-alt"></i> Выйти</a>
+    </div>
+    {% endif %}
 
     <!-- ПАНЕЛЬ ФИЛЬТРОВ -->
     <form class="filter-panel" method="get" action="{{ url_for('index') }}">
@@ -84,7 +85,8 @@
             const icons = {
                 'federal':'🏛️','technical':'🔧','medical':'⚕️','pedagogical':'👨‍🏫','humanitarian':'📚',
                 'economic':'💼','architecture':'🏗️','linguistic':'🔤','social':'👥','veterinary':'🐾',
-                'food_tech':'🍕','technology':'⚙️','art':'🎨','culture':'🎭','space':'🚀'
+                'food_tech':'🍕','technology':'⚙️','art':'🎨','culture':'🎭','space':'🚀',
+                'art': '🎨', 'culture': '🎭', 'law': '⚖️', 'sport': '⚽', 'agricultural': '🌾'
             };
 
             const colors = {

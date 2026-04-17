@@ -14,7 +14,7 @@ TYPE_ICONS = {
     'federal': '🏛️', 'technical': '🔧', 'medical': '⚕️', 'pedagogical': '👨‍🏫',
     'humanitarian': '📚', 'economic': '💼', 'architecture': '🏗️', 'linguistic': '🔤',
     'social': '👥', 'veterinary': '🐾', 'food_tech': '🍕', 'technology': '⚙️',
-    'art': '🎨', 'culture': '🎭'
+    'art': '🎨', 'culture': '🎭', 'law': '⚖️', 'sport': '⚽', 'agricultural': '🌾'
 }
 
 TYPE_NAMES = {
@@ -24,7 +24,9 @@ TYPE_NAMES = {
     'architecture': 'Архитектурный институт', 'linguistic': 'Лингвистический университет',
     'social': 'Социальный университет', 'veterinary': 'Ветеринарная академия',
     'food_tech': 'Пищевой университет', 'technology': 'Технологический университет',
-    'art': 'Художественная академия', 'culture': 'Институт культуры'
+    'art': 'Художественная академия', 'culture': 'Институт культуры',
+    'law': 'Юридический институт', 'sport': 'Спортивный университет',
+    'agricultural': 'Сельскохозяйственный университет'
 }
 
 app = Flask(__name__)
@@ -38,7 +40,9 @@ login_manager.login_view = 'login'
 @login_manager.user_loader
 def load_user(user_id):
     db_sess = db_session.create_session()
-    return db_sess.get(User, int(user_id))
+    user = db_sess.get(User, int(user_id))
+    db_sess.close()
+    return user
 
 
 db_session.global_init("db/university.db")
@@ -120,6 +124,7 @@ def index():
                 'website': uni.website,
                 'is_favorite': uni.id in favorite_ids
             })
+    db_sess.close()
 
     return render_template(
         "index.html",
@@ -147,6 +152,7 @@ def toggle_favorite(university_id):
         user.favorite_universities.append(university)
 
     db_sess.commit()
+    db_sess.close()
     return redirect(request.referrer or "/map")
 
 
@@ -178,7 +184,7 @@ def favorites():
                 'type_icon': TYPE_ICONS.get(uni.type, '🎓'),
                 'type_name': TYPE_NAMES.get(uni.type, 'Университет')
             })
-
+    db_sess.close()
     return render_template("favorites.html", favorites=favorite_universities)
 
 
@@ -211,7 +217,10 @@ def profile():
                 )
                 db_sess.add(universities)
                 db_sess.commit()
+        db_sess.close()
         return redirect('/profile')
+    
+    db_sess.close()
 
     return render_template(
         "profile.html",
@@ -240,7 +249,11 @@ def admin_users():
             if ban_value == "unbanned":
                 user.ban = 0
         db_sess.commit()
+        db_sess.close()
         return redirect('/admin/users')
+    
+    db_sess.close()
+
     return render_template("admin_users.html", users=users)
 
 
@@ -274,6 +287,8 @@ def register():
         db_sess.add(user)
         db_sess.commit()
 
+        db_sess.close()
+
         return redirect('/login')
 
     return render_template('register.html', form=form)
@@ -289,7 +304,10 @@ def login():
 
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
+            db_sess.close()
             return redirect("/map")
+        
+        db_sess.close()
 
         return render_template(
             'login.html',
@@ -322,7 +340,7 @@ def export():
         ])
 
     output.seek(0)
-
+    db_sess.close()
     return Response(output, mimetype='text/csv', headers={'Content-Disposition': 'attachment;filename=universities.csv'})
 
 @app.route('/logout')
