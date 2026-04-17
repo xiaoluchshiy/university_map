@@ -132,6 +132,7 @@ def index():
 
 @app.route('/toggle_favorite/<int:university_id>', methods=['POST'])
 @login_required
+@user_ban
 def toggle_favorite(university_id):
     db_sess = db_session.create_session()
     user = db_sess.get(User, current_user.id)
@@ -151,6 +152,7 @@ def toggle_favorite(university_id):
 
 @app.route('/favorites')
 @login_required
+@user_ban
 def favorites():
     db_sess = db_session.create_session()
     user = db_sess.get(User, current_user.id)
@@ -182,6 +184,7 @@ def favorites():
 
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
+@user_ban
 def profile():
     db_sess = db_session.create_session()
     user = db_sess.get(User, current_user.id)
