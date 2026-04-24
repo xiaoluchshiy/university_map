@@ -185,7 +185,7 @@ def favorites():
                 'type_name': TYPE_NAMES.get(uni.type, 'Университет')
             })
     db_sess.close()
-    return render_template("favorites.html", favorites=favorite_universities)
+    return render_template("favorites.html", favorites=favorite_universities, user=user)
 
 
 @app.route('/profile', methods=['GET', 'POST'])
