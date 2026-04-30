@@ -9,7 +9,7 @@ import csv
 import os
 from functools import wraps
 
-
+# Словари для сопоставления типов вузов с иконками и читаемыми названиями
 TYPE_ICONS = {
     'federal': '🏛️', 'technical': '🔧', 'medical': '⚕️', 'pedagogical': '👨‍🏫',
     'humanitarian': '📚', 'economic': '💼', 'architecture': '🏗️', 'linguistic': '🔤',
@@ -32,11 +32,12 @@ TYPE_NAMES = {
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '65432456uijhgfdsxcvbn'
 
+# Настройка менеджера авторизации
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = 'login'
+login_manager.login_view = 'login' # Перенаправление на страницу входа, если доступ запрещен
 
-
+# Функция для загрузки пользователя из базы данных по ID (нужна для flask-login)
 @login_manager.user_loader
 def load_user(user_id):
     db_sess = db_session.create_session()
@@ -44,69 +45,72 @@ def load_user(user_id):
     db_sess.close()
     return user
 
-
+# Инициализация базы данных
 db_session.global_init("db/university.db")
 
-
+# Обработчик ошибки 403 (Доступ запрещен)
 @app.errorhandler(403)
 def forbidden(e):
     return render_template("403.html"), 403
 
-
+# Обработчик ошибки 401 (Не авторизован)
 @app.errorhandler(401)
 def unauthorized(e):
     return render_template("401.html"), 401
     
-
+# Декоратор для проверки прав администратора
 def admin_required(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         if not current_user.admin:
             abort(403)
         return func(*args, **kwargs)
-
     return wrapper
 
-
+# Декоратор для проверки бана пользователя
 def user_ban(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         if current_user.ban:
             abort(403)
         return func(*args, **kwargs)
-
     return wrapper
 
-
+# Главная страница (Landing page)
 @app.route("/")
 def landing():
     return render_template("landing.html", current_user=current_user)
 
-
+# Основная страница с картой и списком университетов
 @app.route("/map")
 def index():
     db_sess = db_session.create_session()
 
+    # Получение параметров фильтрации из URL
     uni_type = request.args.get("type")
     only_favorites = request.args.get("fav")
 
     query = db_sess.query(University)
 
+    # Фильтрация по типу заведения
     if uni_type and uni_type != "all":
         query = query.filter(University.type == uni_type)
 
     universities = query.all()
 
+    # Обработка избранного для авторизованного пользователя
     favorite_ids = []
     if current_user.is_authenticated:
         user = db_sess.get(User, current_user.id)
         favorite_ids = [u.id for u in user.favorite_universities]
 
+        # Если включен фильтр "только избранное"
         if only_favorites:
             universities = [u for u in universities if u.id in favorite_ids]
 
     all_places = []
 
+    # Формирование списка объектов для карты (парсинг координат из поля content)
     for uni in universities:
         if uni.content and ',' in uni.content:
             try:
@@ -134,7 +138,7 @@ def index():
         current_user=current_user
     )
 
-
+# Добавление/удаление университета из избранного
 @app.route('/toggle_favorite/<int:university_id>', methods=['POST'])
 @login_required
 @user_ban
@@ -155,7 +159,7 @@ def toggle_favorite(university_id):
     db_sess.close()
     return redirect(request.referrer or "/map")
 
-
+# Страница списка избранных университетов
 @app.route('/favorites')
 @login_required
 @user_ban
@@ -165,6 +169,7 @@ def favorites():
 
     favorite_universities = []
 
+    # Сбор данных об избранных вузах для отображения
     for uni in user.favorite_universities:
         if uni.content and ',' in uni.content:
             try:
@@ -187,7 +192,7 @@ def favorites():
     db_sess.close()
     return render_template("favorites.html", favorites=favorite_universities, user=user)
 
-
+# Личный кабинет и импорт данных из CSV
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
 @user_ban
@@ -197,16 +202,19 @@ def profile():
 
     favorite_count = len(user.favorite_universities)
 
+    # Логика загрузки CSV-файла и добавления записей в БД
     if request.method == "POST":
         file = request.files.get("file")
         if not file or file.filename == "":
             abort(400, "Файл не выбран")
+        
         file.filename = "universities.csv"
         os.makedirs(f"universities", exist_ok=True)
         file.save(os.path.join(f"universities", file.filename))
+        
         with open('universities/universities.csv', 'r', encoding='utf-8') as f:
             reader = csv.reader(f, delimiter=',')
-            h = next(reader)
+            h = next(reader) # Пропуск заголовка
             for row in reader:
                 universities = University(
                     title=row[1],
@@ -221,14 +229,13 @@ def profile():
         return redirect('/profile')
     
     db_sess.close()
-
     return render_template(
         "profile.html",
         user=user,
         favorite_count=favorite_count
     )
 
-
+# Админ-панель для управления пользователями (права и бан)
 @app.route('/admin/users', methods=["GET", "POST"])
 @login_required
 @admin_required
@@ -236,32 +243,37 @@ def profile():
 def admin_users():
     db_sess = db_session.create_session()
     users = db_sess.query(User)
+    
     if request.method == "POST":
+        # Обновление статусов каждого пользователя на основе данных формы
         for user in users:
             admin_value = request.form.get(f"admin_{user.id}")
             ban_value = request.form.get(f"ban_{user.id}")
+            
             if admin_value == "admin":
                 user.admin = 1
             if admin_value == "user":
                 user.admin = 0
+                
             if ban_value == "banned":
                 user.ban = 1
             if ban_value == "unbanned":
                 user.ban = 0
+                
         db_sess.commit()
         db_sess.close()
         return redirect('/admin/users')
     
     db_sess.close()
-
     return render_template("admin_users.html", users=users)
 
-
+# Регистрация нового пользователя
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegisterForm()
 
     if form.validate_on_submit():
+        # Проверка совпадения паролей
         if form.password.data != form.password_again.data:
             return render_template(
                 'register.html',
@@ -270,6 +282,7 @@ def register():
             )
 
         db_sess = db_session.create_session()
+        # Проверка уникальности email
         if db_sess.query(User).filter(User.email == form.email.data).first():
             return render_template(
                 'register.html',
@@ -282,18 +295,17 @@ def register():
             email=form.email.data,
             about=form.about.data
         )
-        user.set_password(form.password.data)
+        user.set_password(form.password.data) # Хеширование пароля
 
         db_sess.add(user)
         db_sess.commit()
-
         db_sess.close()
 
         return redirect('/login')
 
     return render_template('register.html', form=form)
 
-
+# Авторизация пользователя
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -302,13 +314,13 @@ def login():
         db_sess = db_session.create_session()
         user = db_sess.query(User).filter(User.email == form.email.data).first()
 
+        # Сверка пароля
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
             db_sess.close()
             return redirect("/map")
         
         db_sess.close()
-
         return render_template(
             'login.html',
             message="Неправильный логин или пароль",
@@ -317,11 +329,11 @@ def login():
 
     return render_template('login.html', form=form)
 
-
+# Экспорт всех университетов из БД в CSV-файл
 @app.route("/export")
 @login_required
 def export():
-    output = io.StringIO()
+    output = io.StringIO() # Создание строкового буфера для CSV
     writer = csv.writer(output)
 
     writer.writerow(['ID', 'TITLE', 'CONTENT', 'TYPE', 'WEBSITE', 'DESCRIPTION'])
@@ -341,14 +353,16 @@ def export():
 
     output.seek(0)
     db_sess.close()
+    # Возврат файла как Response с заголовками для скачивания
     return Response(output, mimetype='text/csv', headers={'Content-Disposition': 'attachment;filename=universities.csv'})
 
+# Выход из системы
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
     return redirect("/")
 
-
+# Запуск приложения
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
